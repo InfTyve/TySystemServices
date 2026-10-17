@@ -1,0 +1,22 @@
+{
+    "permissions": {
+        "allow": [
+            "Bash(cd)",
+            "Bash(unzip)",
+            "Bash(echo)",
+            "Bash(find)",
+            "Bash(head)",
+            "Bash(sort)",
+            "Bash(grep)",
+            "Bash(for)",
+            "Bash(do)",
+            "Bash(done)",
+            "Bash(cat)",
+            "switchMode",
+            "editFile",
+            "writeFile",
+            "Bash(sed)"
+        ],
+        "deny": []
+    }
+}
