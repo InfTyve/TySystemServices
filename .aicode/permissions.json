@@ -15,7 +15,9 @@
             "switchMode",
             "editFile",
             "writeFile",
-            "Bash(sed)"
+            "Bash(sed)",
+            "Bash(tail)",
+            "Bash(xxd)"
         ],
         "deny": []
     }
