@@ -114,22 +114,6 @@ fun PreferencesScreen() {
             item {
                 SegmentedColumn(title = stringResource(R.string.section_personalization)) {
                     item {
-                        NavigationItemWidget(
-                            icon = Icons.Filled.Palette,
-                            title = stringResource(R.string.theme_settings),
-                            description = stringResource(R.string.theme_settings_desc),
-                            onClick = {},
-                        )
-                    }
-                    item {
-                        NavigationItemWidget(
-                            icon = Icons.Filled.Settings,
-                            title = stringResource(R.string.installer_settings),
-                            description = stringResource(R.string.installer_settings_desc),
-                            onClick = {},
-                        )
-                    }
-                    item {
                         DropDownMenuWidget(
                                 icon = Icons.Filled.Settings,
                                 title = stringResource(R.string.big_title_style),
@@ -154,14 +138,6 @@ fun PreferencesScreen() {
                                     saveMainTitleImpl(context, mainTitleImpl)
                                     (context as? Activity)?.recreate()
                                 },
-                        )
-                    }
-                    item {
-                        NavigationItemWidget(
-                            icon = Icons.Filled.Delete,
-                            title = stringResource(R.string.uninstaller_settings),
-                            description = stringResource(R.string.uninstaller_settings_desc),
-                            onClick = {},
                         )
                     }
                     item {
@@ -191,42 +167,6 @@ fun PreferencesScreen() {
                 SegmentedColumn(title = stringResource(R.string.section_basic)) {
                     item {
                         SwitchWidget(
-                            icon = Icons.Filled.Wifi,
-                            title = stringResource(R.string.network_settings),
-                            description = stringResource(R.string.network_settings_desc),
-                            checked = internetAccess,
-                            onCheckedChange = { internetAccess = it },
-                        )
-                    }
-                    item {
-                        SwitchWidget(
-                            icon = Icons.Filled.Shield,
-                            title = stringResource(R.string.disable_adb_verify),
-                            description = stringResource(R.string.disable_adb_verify_desc),
-                            checked = adbVerify,
-                            onCheckedChange = { adbVerify = it },
-                        )
-                    }
-                    item {
-                        SwitchWidget(
-                            icon = Icons.Filled.BatteryFull,
-                            title = stringResource(R.string.ignore_battery),
-                            description = stringResource(R.string.ignore_battery_desc),
-                            checked = ignoreBattery,
-                            onCheckedChange = { ignoreBattery = it },
-                        )
-                    }
-                    item {
-                        SwitchWidget(
-                            icon = Icons.Filled.VisibilityOff,
-                            title = stringResource(R.string.hide_launcher_icon),
-                            description = stringResource(R.string.hide_launcher_icon_desc),
-                            checked = hideLauncherIcon,
-                            onCheckedChange = { hideLauncherIcon = it },
-                        )
-                    }
-                    item {
-                        SwitchWidget(
                             icon = Icons.Filled.ArrowDropDown,
                             title = stringResource(R.string.dropdown_popup_new),
                             description = stringResource(R.string.dropdown_popup_new_desc),
@@ -237,6 +177,12 @@ fun PreferencesScreen() {
                 }
             }
 
+            item {
+                ExpandableCard(
+                    expanded = advancedExpanded,
+                    onExpandedChange = { advancedExpanded = it },
+                )
+            }
             item {
                 ExpandableCard(
                     expanded = advancedExpanded,
