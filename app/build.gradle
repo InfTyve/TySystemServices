@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.refine)
 }
 
 android {
@@ -73,10 +74,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("com.materialkolor:material-kolor:5.0.1")
     implementation("com.github.KieronQuinn:MonetCompat:0.4.1")
-    compileOnly 'dev.rikka.tools.refine:annotation:4.4.0'
-    compileOnly 'dev.rikka.tools.refine:annotation-processor:4.4.0'
-    compileOnly 'dev.rikka.tools.refine:gradle-plugin:4.4.0'
-    compileOnly 'dev.rikka.tools.refine:runtime:4.4.0'
+    compileOnly project(':hidden-api')
+    implementation libs.refine.runtime
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation libs.ui.test.manifest
     //implementation files('libs/framework.jar')

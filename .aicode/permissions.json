@@ -17,7 +17,8 @@
             "writeFile",
             "Bash(sed)",
             "Bash(tail)",
-            "Bash(xxd)"
+            "Bash(xxd)",
+            "Bash(curl)"
         ],
         "deny": []
     }
