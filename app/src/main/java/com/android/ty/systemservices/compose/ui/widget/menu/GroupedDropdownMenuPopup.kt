@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 /** 下拉菜单版本开关：true 用新版（可滚动），false 用旧版（不可滚动） */
-var useNewDropdownPopup by mutableStateOf(R.bool.new_popup)
+var useNewDropdownPopup by mutableStateOf(true)
 
 /**
  * The shared layout shell for expressive dropdown menus.

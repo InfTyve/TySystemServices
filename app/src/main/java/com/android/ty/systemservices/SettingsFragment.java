@@ -45,7 +45,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             });
         }
         if (opentysett != null) {
-            openoverlay.setOnPreferenceClickListener(preference -> {
+            opentysett.setOnPreferenceClickListener(preference -> {
                 Intent intent = new Intent(getActivity(), MingActivity.class);
                 startActivity(intent);
                 return true;

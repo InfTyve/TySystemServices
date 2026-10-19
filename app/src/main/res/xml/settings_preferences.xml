@@ -14,4 +14,10 @@
         android:key="nvg_home"
         android:title="NVG"
         android:defaultValue="false" />
+    <androidx.preference.PreferenceCategory
+        android:title="" />
+    <com.android.ty.systemservices.compose.ui.preference.ComposePreference
+        android:key="open_tysettings"
+        android:title="Settings"
+        app:iconDrawable="@drawable/ic_settings_24dp"/>
 </androidx.preference.PreferenceScreen>
