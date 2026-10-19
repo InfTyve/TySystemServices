@@ -14,6 +14,7 @@ import androidx.preference.PreferenceScreen;
 import androidx.preference.ListPreference;
 
 import com.android.ty.systemservices.R;
+import com.android.ty.systemservices.BackButtonHelper;
 
 public class OverlayActivity extends CollapsingToolbarBaseActivity {
 
@@ -22,7 +23,7 @@ public class OverlayActivity extends CollapsingToolbarBaseActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_overlay);
-        setBackButton(true);
+        setBackButton(BackButtonHelper.isFromOwnActivity(this));
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_frame, new OverlayPreferenceFragment())
                 .commit();

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.FrameLayout
 import androidx.compose.ui.platform.ComposeView
 import com.android.ty.systemservices.R
+import com.android.ty.systemservices.BackButtonHelper
 import com.android.ty.systemservices.compose.ui.screen.PreferencesScreen
 import com.android.ty.systemservices.compose.ui.theme.TyTheme
 
@@ -15,8 +16,8 @@ class MingActivity : CollapsingToolbarBaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 顶层页：不需要返回按钮
-        setBackButton(false)
+        // 根据是否从本应用其它页面进入，决定返回按钮显隐
+        setBackButton(BackButtonHelper.isFromOwnActivity(this))
         setLargeTitle(R.string.title_preferences)
 
         // 主页内容：ComposeView 放进 content_frame（无 Scaffold/TopAppBar，头部由基类承载）

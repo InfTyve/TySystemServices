@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.FrameLayout
 import androidx.compose.ui.platform.ComposeView
 import com.android.ty.systemservices.R
+import com.android.ty.systemservices.BackButtonHelper
 import com.android.ty.systemservices.compose.ui.screen.LabPageContent
 import com.android.ty.systemservices.compose.ui.theme.TyTheme
 
@@ -15,8 +16,8 @@ class LabActivity : CollapsingToolbarBaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 次级页：需要返回按钮
-        setBackButton(true)
+        // 根据是否从本应用其它页面进入，决定返回按钮显隐
+        setBackButton(BackButtonHelper.isFromOwnActivity(this))
         setLargeTitle(R.string.title_lab)
 
         // 实验室内容：LabPage 放进 content_frame

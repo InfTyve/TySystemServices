@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.android.ty.systemservices.R
+import com.android.ty.systemservices.BackButtonHelper
 import com.android.ty.systemservices.compose.ui.widget.setting.BigTitleImpl
 import com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveCollapsingToolbarLayout
 import com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveCollapsingToolbarLayout_Two
@@ -40,13 +41,14 @@ class XmlPreferenceActivity : AppCompatActivity() {
             BigTitleImpl.ORIGINAL -> supportActionBar?.title = getString(R.string.app_name)
         }
 
-        // 通过子类控制返回按钮：true 开启，false 关闭（两个子类接口一致）
+        // 根据是否从本应用其它页面进入，决定返回按钮显隐
+        val showBack = BackButtonHelper.isFromOwnActivity(this)
         when (rootImplementation) {
             BigTitleImpl.ONE -> findViewById<ExpressiveCollapsingToolbarLayout>(R.id.collapsing_toolbar)
-                .setBackButtonEnabled(true)
+                .setBackButtonEnabled(showBack)
             BigTitleImpl.TWO -> findViewById<ExpressiveCollapsingToolbarLayout_Two>(R.id.collapsing_toolbar)
-                .setBackButtonEnabled(true)
-            BigTitleImpl.ORIGINAL -> supportActionBar?.setDisplayHomeAsUpEnabled(true)
+                .setBackButtonEnabled(showBack)
+            BigTitleImpl.ORIGINAL -> supportActionBar?.setDisplayHomeAsUpEnabled(showBack)
         }
 
         if (savedInstanceState == null) {
