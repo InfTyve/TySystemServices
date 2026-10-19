@@ -8,7 +8,7 @@ import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.platform.ComposeView
 import com.android.ty.systemservices.R
-import com.android.ty.systemservices.compose.ui.theme.InstallerXTheme
+import com.android.ty.systemservices.compose.ui.theme.TyTheme
 import com.google.android.material.appbar.CollapsingToolbarLayout
 
 /**
@@ -53,7 +53,7 @@ class ExpressiveCollapsingToolbarLayout @JvmOverloads constructor(
             toolbar.addView(this)
         }
         backButtonContainer?.setContent {
-            InstallerXTheme {
+            TyTheme {
                 ExpressiveBackButton(onClick = { (context as? Activity)?.finish() })
             }
         }
