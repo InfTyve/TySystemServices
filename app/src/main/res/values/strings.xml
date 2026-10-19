@@ -112,4 +112,8 @@
     <string name="theme_mode_follow_system">跟随系统</string>
     <string name="theme_mode_light">浅色模式</string>
     <string name="theme_mode_dark">深色模式</string>
+
+    <!-- 下拉菜单版本开关 -->
+    <string name="dropdown_popup_new">新版下拉菜单</string>
+    <string name="dropdown_popup_new_desc">开启使用可滚动的新版下拉菜单，关闭则用旧版</string>
 </resources>

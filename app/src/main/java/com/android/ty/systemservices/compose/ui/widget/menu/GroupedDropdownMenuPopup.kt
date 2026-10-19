@@ -12,8 +12,14 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuItemShapes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+
+/** 下拉菜单版本开关：true 用新版（可滚动），false 用旧版（不可滚动） */
+var useNewDropdownPopup by mutableStateOf(true)
 
 /**
  * The shared layout shell for expressive dropdown menus.
@@ -31,10 +37,15 @@ fun GroupedDropdownMenuPopup(
     modifier: Modifier = Modifier,
     itemContent: @Composable (groupIndex: Int, itemIndex: Int, shapes: MenuItemShapes) -> Unit,
 ) {
+    val scrollState = rememberScrollState()
     DropdownMenuPopup(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
-        modifier = modifier.verticalScroll(rememberScrollState()),
+        modifier = if (useNewDropdownPopup) {
+            modifier.verticalScroll(scrollState)
+        } else {
+            modifier
+        },
     ) {
         val nonEmptyGroups = groupSizes.mapIndexedNotNull { groupIndex, itemCount ->
             itemCount.takeIf { it > 0 }?.let { groupIndex to it }

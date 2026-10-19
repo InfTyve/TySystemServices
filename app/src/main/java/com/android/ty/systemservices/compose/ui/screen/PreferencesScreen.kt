@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Delete
@@ -76,6 +77,7 @@ import com.android.ty.systemservices.compose.ui.widget.SwitchWidget
 import com.android.ty.systemservices.compose.ui.widget.SwitchOw
 import com.android.ty.systemservices.compose.ui.widget.InfoTipCard
 import com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveBackButton
+import com.android.ty.systemservices.compose.ui.widget.menu.useNewDropdownPopup
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -221,6 +223,15 @@ fun PreferencesScreen() {
                             description = stringResource(R.string.hide_launcher_icon_desc),
                             checked = hideLauncherIcon,
                             onCheckedChange = { hideLauncherIcon = it },
+                        )
+                    }
+                    item {
+                        SwitchWidget(
+                            icon = Icons.Filled.ArrowDropDown,
+                            title = stringResource(R.string.dropdown_popup_new),
+                            description = stringResource(R.string.dropdown_popup_new_desc),
+                            checked = useNewDropdownPopup,
+                            onCheckedChange = { useNewDropdownPopup = it },
                         )
                     }
                 }
