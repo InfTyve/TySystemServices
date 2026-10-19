@@ -37,8 +37,8 @@
 
         <com.android.ty.systemservices.compose.ui.preference.ComposeDropDownMenuPreference
             android:key="resolution"
-            android:title="@string/pref_system"
-            android:summary="@string/current_value_format"
+            android:title="11"
+            android:summary="1145: %s"
             android:entries="@array/lll"
             android:entryValues="@array/lll"
             android:defaultValue="001" />

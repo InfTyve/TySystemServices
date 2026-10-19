@@ -6,7 +6,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.compose.ui.platform.ComposeView
 import com.android.ty.systemservices.R
-import com.android.ty.systemservices.compose.ui.theme.InstallerXTheme
+import com.android.ty.systemservices.compose.ui.theme.TyTheme
 import com.google.android.material.appbar.CollapsingToolbarLayout
 
 /**
@@ -52,7 +52,7 @@ class ExpressiveCollapsingToolbarLayout_Two @JvmOverloads constructor(
         // 布局中手写的返回按钮容器：找到后渲染 ExpressiveBackButton
         backButtonContainer = findViewById<ComposeView>(R.id.back_button_container) ?: return
         backButtonContainer?.setContent {
-            InstallerXTheme {
+            TyTheme {
                 ExpressiveBackButton(onClick = { (context as? Activity)?.finish() })
             }
         }

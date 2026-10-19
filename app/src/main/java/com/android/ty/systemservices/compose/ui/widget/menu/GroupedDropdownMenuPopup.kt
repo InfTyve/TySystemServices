@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 /** 下拉菜单版本开关：true 用新版（可滚动），false 用旧版（不可滚动） */
-var useNewDropdownPopup by mutableStateOf(true)
+var useNewDropdownPopup by mutableStateOf(R.bool.new_popup)
 
 /**
  * The shared layout shell for expressive dropdown menus.
@@ -44,7 +44,7 @@ fun GroupedDropdownMenuPopup(
         onDismissRequest = onDismissRequest,
         modifier = if (useNewDropdownPopup) {
             modifier
-                .padding(vertical = 8.dp)
+                .padding(vertical = 0.dp)
                 .verticalScroll(scrollState)
         } else {
             modifier

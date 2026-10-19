@@ -10,23 +10,23 @@
         <item>reply_all</item>
     </string-array>
     <array name="lll">
-        <item name="@ref/2000000">Text1</item>
-        <item name="@ref/2000001">Text</item>
-        <item name="@ref/2000002">Text</item>
-        <item name="@ref/2000003">Text</item>
-        <item name="@ref/2000004">Text</item>
-        <item name="@ref/2000005">Text</item>
-        <item name="@ref/2000006">Text</item>
-        <item name="@ref/2000007">Text</item>
-        <item name="@ref/2000008">Text</item>
-        <item name="@ref/2000009">Text</item>
-        <item name="@ref/200000a">Text</item>
-        <item name="@ref/200000b">Text</item>
-        <item name="@ref/200000c">Text</item>
-        <item name="@ref/200000d">Text</item>
-        <item name="@ref/200000e">Text</item>
-        <item name="@ref/200000f">Text</item>
-        <item name="@ref/2000010">Text</item>
+        <item >Text1</item>
+        <item >Text</item>
+        <item >Text</item>
+        <item >Text</item>
+        <item >Text</item>
+        <item name="5">Text</item>
+        <item name="6">Text</item>
+        <item name="7">Text</item>
+        <item name="8">Text</item>
+        <item name="9">Text</item>
+        <item name="a">Text</item>
+        <item name="b">Text</item>
+        <item name="c">Text</item>
+        <item name="d">Text</item>
+        <item name="e">Text</item>
+        <item name="f">Text</item>
+        <item>Text</item>
         <item name="@ref/2000011">Text</item>
         <item name="@ref/2000012">Text</item>
         <item name="@ref/2000013">Text</item>
@@ -37,6 +37,6 @@
         <item name="@ref/2000018">Text</item>
         <item name="@ref/2000019">Text</item>
         <item name="@ref/200001a">Text</item>
-        <item name="@ref/200001b">001</item>
+        <item name="@ref/200001b">Jar</item>
     </array>
 </resources>
