@@ -4,6 +4,8 @@ package com.android.ty.systemservices.compose.ui.widget.menu
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -32,7 +34,7 @@ fun GroupedDropdownMenuPopup(
     DropdownMenuPopup(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
-        modifier = modifier,
+        modifier = modifier.verticalScroll(rememberScrollState()),
     ) {
         val nonEmptyGroups = groupSizes.mapIndexedNotNull { groupIndex, itemCount ->
             itemCount.takeIf { it > 0 }?.let { groupIndex to it }
