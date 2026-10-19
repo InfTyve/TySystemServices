@@ -35,6 +35,13 @@
             android:dialogTitle="签名"
             android:summary="%s" />
 
+        <com.android.ty.systemservices.compose.ui.preference.ComposeDropDownMenuPreference
+            android:key="resolution"
+            android:title="@string/pref_system"
+            android:summary="@string/current_value_format"
+            android:entries="@array/lll"
+            android:entryValues="@array/lll"
+            android:defaultValue="001" />
         <com.android.ty.systemservices.compose.ui.preference.ComposePreference
             android:key="about"
             android:title="关于"
