@@ -78,6 +78,7 @@ import com.android.ty.systemservices.compose.ui.widget.SwitchOw
 import com.android.ty.systemservices.compose.ui.widget.InfoTipCard
 import com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveBackButton
 import com.android.ty.systemservices.compose.ui.widget.menu.useNewDropdownPopup
+import com.android.ty.systemservices.compose.ui.widget.ExpandableCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,6 +89,7 @@ fun PreferencesScreen() {
     var ignoreBattery by remember { mutableStateOf(false) }
     var hideLauncherIcon by remember { mutableStateOf(false) }
     var advancedExpanded by remember { mutableStateOf(false) }
+    var advancedExpanded2 by remember { mutableStateOf(false) }
     var bigTitleImpl by remember { mutableStateOf(loadBigTitleImpl(context)) }
     var mainTitleImpl by remember { mutableStateOf(loadMainTitleImpl(context)) }
 
@@ -102,13 +104,13 @@ fun PreferencesScreen() {
     ) {
             item {
                 StatusCard(
-                    appName = stringResource(R.string.status_app_name),
+                    appName = stringResource(R.string.app_name),
                     version = stringResource(R.string.status_version),
                     useBlur = true,
                 )
             }
             item {
-                InfoTipCard(stringResource(R.string.tip_default))
+                InfoTipCard(stringResource(R.string.app_name))
             }
 
             item {
@@ -140,26 +142,26 @@ fun PreferencesScreen() {
                                 },
                         )
                     }
-                    item {
-                        NavigationItemWidget(
-                            icon = Icons.Filled.Science,
-                            title = stringResource(R.string.lab),
-                            description = stringResource(R.string.lab_desc),
-                            onClick = {
-                                context.startActivity(Intent(context, LabActivity::class.java))
-                            },
-                        )
-                    }
-                    item {
-                        NavigationItemWidget(
-                            icon = Icons.Filled.Science,
-                            title = stringResource(R.string.preference),
-                            description = stringResource(R.string.preference_desc),
-                            onClick = {
-                                context.startActivity(Intent(context, XmlPreferenceActivity::class.java))
-                            },
-                        )
-                    }
+                    //item {
+                    //    NavigationItemWidget(
+                    //        icon = Icons.Filled.Science,
+                    //        title = stringResource(R.string.lab),
+                    //        description = stringResource(R.string.lab_desc),
+                    //        onClick = {
+                    //            context.startActivity(Intent(context, LabActivity::class.java))
+                    //        },
+                    //    )
+                    //}
+                    //item {
+                    //    NavigationItemWidget(
+                    //        icon = Icons.Filled.Science,
+                    //        title = stringResource(R.string.preference),
+                    //        description = stringResource(R.string.preference_desc),
+                    //        onClick = {
+                    //            context.startActivity(Intent(context, XmlPreferenceActivity::class.java))
+                    //        },
+                    //    )
+                    //}
                 }
             }
 
@@ -179,15 +181,33 @@ fun PreferencesScreen() {
 
             item {
                 ExpandableCard(
+                    title = stringResource(R.string.advanced_options),
+                    description = stringResource(R.string.advanced_options_hint),
+                    icon = Icons.Filled.Build,
                     expanded = advancedExpanded,
                     onExpandedChange = { advancedExpanded = it },
-                )
+                ) {
+                    BaseWidget(
+                        icon = Icons.Filled.Build,
+                        title = stringResource(R.string.expanded_item),
+                        description = stringResource(R.string.expanded_item_desc),
+                    )
+                }
             }
             item {
                 ExpandableCard(
-                    expanded = advancedExpanded,
-                    onExpandedChange = { advancedExpanded = it },
-                )
+                    title = stringResource(R.string.advanced_options),
+                    description = stringResource(R.string.advanced_options_hint),
+                    icon = Icons.Filled.Build,
+                    expanded = advancedExpanded2,
+                    onExpandedChange = { advancedExpanded2 = it },
+                ) {
+                    BaseWidget(
+                        icon = Icons.Filled.Build,
+                        title = stringResource(R.string.expanded_item),
+                        description = stringResource(R.string.expanded_item_desc),
+                    )
+                }
             }
 
             item {
@@ -201,69 +221,6 @@ fun PreferencesScreen() {
  * Card + AnimatedVisibility(expandVertically/shrinkVertically) 实现，
  * 替代原版 SegmentedColumn.expandableItem 的动态插删写法，规避 Android 12 闪退。
  */
-@Composable
-private fun ExpandableCard(
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-) {
-    Card(
-        onClick = { onExpandedChange(!expanded) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceBright,
-        ),
-    ) {
-        Column(modifier = Modifier.padding(vertical = 4.dp)) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.Build,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp),
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text(
-                            text = stringResource(R.string.advanced_options),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Text(
-                            text = stringResource(R.string.advanced_options_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-                IconButton(onClick = { onExpandedChange(!expanded) }) {
-                    Icon(
-                        imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                        contentDescription = stringResource(if (expanded) R.string.collapse else R.string.expand),
-                    )
-                }
-            }
-            AnimatedVisibility(
-                visible = expanded,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically(),
-            ) {
-                BaseWidget(
-                    icon = Icons.Filled.Build,
-                    title = stringResource(R.string.expanded_item),
-                    description = stringResource(R.string.expanded_item_desc),
-                )
-            }
-        }
-    }
-}
 
 /**
  * 演示 InteractiveHighlight：点按时出现 AGSL 水波高亮。

@@ -10,4 +10,17 @@
     <string name="theme_customization_icon_shape_title">图标形状</string>
     <string name="enable_setup">启用Setup</string>
     <string name="overlay_open">切换Overlay</string>
+    <string name="dropdown_popup_new">新下拉菜单</string>
+    <string name="dropdown_popup_new_desc">开启使用可滚动的新版下拉菜单</string>
+    <string name="big_title_one">平滑过渡</string>
+    <string name="big_title_two">渐变消失</string>
+    <string name="big_title_original">原顶部栏</string>
+    <string name="main_big_title_style">Preference大标题切换</string>
+    <string name="main_big_title_desc">Compose大标题切换</string>
+    <string name="big_title_style">Preference大标题切换</string>
+    <string name="main_big_title_one">平滑过渡</string>
+    <string name="main_big_title_two">渐变消失</string>
+    <string name="compose_settings">设置</string>
+    <string name="status_bar_settings">状态栏</string>
+    <string name="navigation_bar_settings">导航栏</string>
 </resources>

@@ -46,7 +46,6 @@ dependencies {
     implementation libs.preference
     androidTestImplementation platform(libs.compose.bom)
     androidTestImplementation libs.ui.test.junit4
-    compileOnly fileTree(dir: 'libs', include: '*.jar')
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
@@ -77,6 +76,7 @@ dependencies {
     compileOnly project(':hidden-api')
     implementation libs.refine.runtime
     debugImplementation("androidx.compose.ui:ui-tooling")
+    compileOnly fileTree(dir: 'libs', include: '*.jar')
     debugImplementation libs.ui.test.manifest
     //implementation files('libs/framework.jar')
 }

@@ -20,7 +20,9 @@
             "Bash(xxd)",
             "Bash(curl)",
             "Bash(javap)",
-            "Bash(1)"
+            "Bash(1)",
+            "Bash(git diff)",
+            "Bash(rm -f hidden-api/src/main/java/android/os/ServiceManagerHidden.java hidden-api/src/main/java/android/os/UserHandleHidden.java)"
         ],
         "deny": []
     }

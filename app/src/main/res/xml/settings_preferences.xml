@@ -7,17 +7,17 @@
         android:title="@string/overlay_open"
         android:key="overlay_open_preference" />
     <com.android.ty.systemservices.compose.ui.preference.ComposeSwitchPreference
-        android:title="Status"
+        android:title="@string/status_bar_settings"
         android:key="status_bar_qs"
         android:defaultValue="false" />
     <com.android.ty.systemservices.compose.ui.preference.ComposeSwitchPreference
         android:key="nvg_home"
-        android:title="NVG"
+        android:title="@string/navigation_bar_settings"
         android:defaultValue="false" />
     <androidx.preference.PreferenceCategory
         android:title="" />
     <com.android.ty.systemservices.compose.ui.preference.ComposePreference
         android:key="open_tysettings"
-        android:title="Settings"
+        android:title="@string/compose_settings"
         app:iconDrawable="@drawable/ic_settings_24dp"/>
 </androidx.preference.PreferenceScreen>

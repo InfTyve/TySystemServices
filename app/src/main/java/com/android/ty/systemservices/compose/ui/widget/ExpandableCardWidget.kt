@@ -1,148 +1,175 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package com.android.ty.systemservices.compose.ui.widget
 
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.toggleableState
-import androidx.compose.ui.state.ToggleableState
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.BatteryFull
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Science
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.TouchApp
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.ty.systemservices.R
 
 /**
- * A setting widget with a [Switch] trailing content.
- *
- * @param modifier The [Modifier] to be applied to the widget.
- * @param icon The [ImageVector] to be displayed at the start of the widget.
- * @param title The primary text displayed in the widget.
- * @param description The optional supporting text displayed below the title.
- * @param enabled Whether the widget is enabled and interactive.
- * @param isError Whether the widget is displayed in an error state.
- * @param checked Whether the switch is currently checked.
- * @param onCheckedChange Called when the user toggles the switch.
+ * [BaseWidget] 的展开版：在 ListItem 头部下方多渲染一块 [content]，两者共享同一张圆角卡片背景。
+ * 独立于 [BaseWidget] 存在，避免给 Switch / DropDownMenu 等既有调用方引入改动。
  */
 @Composable
-private fun ExpandableCard(
+fun ExpandableBaseWidget(
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    iconRes: Int? = null,
+    title: String,
+    description: String? = null,
+    enabled: Boolean = true,
+    isError: Boolean = false,
+    onClick: (() -> Unit)? = null,
+    containerColor: Color? = null,
+    accentColor: Color? = null,
+    trailingContent: @Composable () -> Unit = {},
+    content: @Composable () -> Unit = {},
+) {
+    val shape = LocalSegmentedItemShape.current
+    val alpha = if (enabled) 1f else 0.38f
+    val container = containerColor ?: MaterialTheme.colorScheme.surfaceBright
+
+    val colors = ListItemDefaults.colors(
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        leadingContentColor = accentColor ?: MaterialTheme.colorScheme.onSurfaceVariant,
+        trailingContentColor = accentColor ?: MaterialTheme.colorScheme.onSurfaceVariant,
+        supportingContentColor = when {
+            isError -> MaterialTheme.colorScheme.error
+            accentColor != null -> accentColor
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
+        },
+    )
+
+    val headline: @Composable () -> Unit = {
+        Text(text = title, style = MaterialTheme.typography.titleMedium)
+    }
+    val supporting: (@Composable () -> Unit)? = description?.let { d ->
+        { Text(text = d, style = MaterialTheme.typography.bodyMedium) }
+    }
+    val leading: (@Composable () -> Unit)? = when {
+        iconRes != null -> {
+            {
+                Icon(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+        }
+
+        icon != null -> {
+            { Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(24.dp)) }
+        }
+
+        else -> null
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(container),
+    ) {
+        val itemModifier = if (onClick != null) {
+            Modifier.fillMaxWidth()
+        } else {
+            Modifier.fillMaxWidth().alpha(alpha)
+        }
+
+        if (onClick != null) {
+            ListItem(
+                modifier = itemModifier,
+                content = headline,
+                supportingContent = supporting,
+                leadingContent = leading,
+                trailingContent = trailingContent,
+                verticalAlignment = Alignment.CenterVertically,
+                colors = colors,
+                enabled = enabled,
+                onClick = onClick,
+            )
+        } else {
+            ListItem(
+                modifier = itemModifier,
+                content = headline,
+                supportingContent = supporting,
+                leadingContent = leading,
+                trailingContent = trailingContent,
+                verticalAlignment = Alignment.CenterVertically,
+                colors = colors,
+            )
+        }
+        content()
+    }
+}
+
+/**
+ * An expandable card: a header row (optional icon + title + description + expand toggle)
+ * that reveals [content] when expanded.
+ *
+ * @param expanded Whether the card is currently expanded.
+ * @param onExpandedChange Called when the user toggles the expand state.
+ * @param title The primary text displayed in the header.
+ * @param description Optional supporting text displayed below the title.
+ * @param icon Optional leading icon; omitted when null.
+ * @param content The content revealed when expanded.
+ */
+@Composable
+fun ExpandableCard(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
+    title: String,
+    description: String? = null,
+    icon: ImageVector? = null,
+    content: @Composable () -> Unit = {},
 ) {
-    Card(
-        onClick = { onExpandedChange(!expanded) },
+    ExpandableBaseWidget(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceBright,
-        ),
+        icon = icon,
+        title = title,
+        description = description,
+        onClick = { onExpandedChange(!expanded) },
+        trailingContent = {
+            Icon(
+                imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                contentDescription = stringResource(if (expanded) R.string.collapse else R.string.expand),
+            )
+        },
     ) {
-        Column(modifier = Modifier.padding(vertical = 4.dp)) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.Build,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp),
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text(
-                            text = stringResource(R.string.advanced_options),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Text(
-                            text = stringResource(R.string.advanced_options_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-                IconButton(onClick = { onExpandedChange(!expanded) }) {
-                    Icon(
-                        imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                        contentDescription = stringResource(if (expanded) R.string.collapse else R.string.expand),
-                    )
-                }
-            }
-            AnimatedVisibility(
-                visible = expanded,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically(),
-            ) {
-                BaseWidget(
-                    icon = Icons.Filled.Build,
-                    title = stringResource(R.string.expanded_item),
-                    description = stringResource(R.string.expanded_item_desc),
-                )
-            }
+        AnimatedVisibility(
+            visible = expanded,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically(),
+        ) {
+            content()
         }
     }
 }
