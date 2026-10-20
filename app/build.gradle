@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.refine)
+    id('dev.rikka.tools.refine') version '4.4.0'
 }
 
 android {
@@ -43,6 +44,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 dependencies {
+    compileOnly project(':hidden-api')
     implementation libs.preference
     androidTestImplementation platform(libs.compose.bom)
     androidTestImplementation libs.ui.test.junit4
