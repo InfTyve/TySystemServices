@@ -18,7 +18,9 @@
             "Bash(sed)",
             "Bash(tail)",
             "Bash(xxd)",
-            "Bash(curl)"
+            "Bash(curl)",
+            "Bash(javap)",
+            "Bash(1)"
         ],
         "deny": []
     }

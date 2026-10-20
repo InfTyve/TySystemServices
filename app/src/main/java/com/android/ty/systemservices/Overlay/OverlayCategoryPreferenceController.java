@@ -1,12 +1,16 @@
 package com.android.ty.systemservices.Overlay;
 
 import android.content.Context;
+import android.content.om.IOverlayManager;
+import android.content.om.OverlayInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceManagerHidden;
+import android.os.UserHandleHidden;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -16,9 +20,6 @@ import androidx.preference.PreferenceScreen;
 
 import com.android.ty.systemservices.R;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,8 +43,9 @@ import java.util.List;
  *       或 newPkg 与 current 相同，直接返回 true；否则起 AsyncTask 真正下发切换，
  *       onPostExecute 里再 updateState。</li>
  * </ul>
- * 由于 IOverlayManager / OverlayInfo 均为隐藏 API，这里全部用反射，纯 Gradle 工程无需 framework.jar。
- * 平台签名 + system uid 的 App 享有 hidden-api 豁免，反射可正常调用。
+ * IOverlayManager / OverlayInfo 均为隐藏 API，这里通过 HiddenApiRefinePlugin 的 hidden-api 存根模块
+ * 以“链接方式”直接调用（compileOnly，运行时链接到框架真实类），不再使用反射。
+ * 平台签名 + system uid 的 App 享有 hidden-api 豁免，可直接调用隐藏 API。
  */
 public class OverlayCategoryPreferenceController implements Preference.OnPreferenceChangeListener {
     private static final String TAG = "OverlayCategoryCtrl";
@@ -53,7 +55,7 @@ public class OverlayCategoryPreferenceController implements Preference.OnPrefere
 
     private final Context mContext;
     private final String mCategory;
-    private final Object mOverlayManager;   // android.content.om.IOverlayManager
+    private final IOverlayManager mOverlayManager;   // android.content.om.IOverlayManager
     private final PackageManager mPackageManager;
     private final boolean mAvailable;
 
@@ -103,49 +105,31 @@ public class OverlayCategoryPreferenceController implements Preference.OnPrefere
      * 对应 getOverlayInfos()：getOverlayInfosForTarget("android", 0) 后按 category 过滤，
      * 再按 OverlayInfo.priority 升序排序。
      */
-    private List<Object> getOverlayInfos() {
-        List<Object> result = new ArrayList<>();
+    private List<OverlayInfo> getOverlayInfos() {
+        List<OverlayInfo> result = new ArrayList<>();
         if (mOverlayManager == null) {
             return result;
         }
         try {
-            Method m = mOverlayManager.getClass()
-                    .getMethod("getOverlayInfosForTarget", String.class, int.class);
-            List<?> infos = (List<?>) m.invoke(mOverlayManager, "android", 0);
-            for (Object info : infos) {
-                String cat = getOverlayInfoField(info, "category", String.class);
-                if (mCategory.equals(cat)) {
+            List<OverlayInfo> infos = mOverlayManager.getOverlayInfosForTarget("android", 0);
+            for (OverlayInfo info : infos) {
+                if (mCategory.equals(info.category)) {
                     result.add(info);
                 }
             }
             // OVERLAY_INFO_COMPARATOR = Comparator.comparingInt(info -> info.priority)
-            final Field priority = result.isEmpty() ? null
-                    : findField(result.get(0).getClass(), "priority");
-            if (priority != null) {
-                Collections.sort(result, new Comparator<Object>() {
-                    @Override
-                    public int compare(Object o1, Object o2) {
-                        try {
-                            int p1 = priority.getInt(o1);
-                            int p2 = priority.getInt(o2);
-                            return Integer.compare(p1, p2);
-                        } catch (Throwable t) {
-                            return 0;
-                        }
-                    }
-                });
-            }
-        } catch (InvocationTargetException ite) {
-            // 反射调用底层 AIDL：RemoteException 被包装，还原 smali 的 rethrowFromSystemServer()
-            Throwable cause = ite.getCause();
-            if (cause instanceof RemoteException) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    throw ((RemoteException) cause).rethrowFromSystemServer();
+            Collections.sort(result, new Comparator<OverlayInfo>() {
+                @Override
+                public int compare(OverlayInfo o1, OverlayInfo o2) {
+                    return Integer.compare(o1.priority, o2.priority);
                 }
+            });
+        } catch (RemoteException e) {
+            // AIDL 调用底层系统服务：还原 smali 的 rethrowFromSystemServer()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                throw e.rethrowFromSystemServer();
             }
-            throw new RuntimeException(cause);
-        } catch (Throwable t) {
-            Log.w(TAG, "getOverlayInfos failed", t);
+            throw new RuntimeException(e);
         }
         return result;
     }
@@ -174,8 +158,8 @@ public class OverlayCategoryPreferenceController implements Preference.OnPrefere
         String selValue = entryValues.get(0);
         String selSummary = entries.get(0);
 
-        for (Object info : getOverlayInfos()) {
-            String pkg = getOverlayInfoField(info, "packageName", String.class);
+        for (OverlayInfo info : getOverlayInfos()) {
+            String pkg = info.packageName;
             entryValues.add(pkg);
 
             String label;
@@ -188,7 +172,7 @@ public class OverlayCategoryPreferenceController implements Preference.OnPrefere
             }
             entries.add(label);
 
-            if (isEnabled(info)) {
+            if (info.isEnabled()) {
                 selValue = pkg;
                 selSummary = label;
             }
@@ -220,9 +204,9 @@ public class OverlayCategoryPreferenceController implements Preference.OnPrefere
      */
     private boolean setOverlay(final String newPkg) {
         String currentPkg = null;
-        for (Object info : getOverlayInfos()) {
-            if (isEnabled(info)) {
-                currentPkg = getOverlayInfoField(info, "packageName", String.class);
+        for (OverlayInfo info : getOverlayInfos()) {
+            if (info.isEnabled()) {
+                currentPkg = info.packageName;
                 break;
             }
         }
@@ -262,8 +246,8 @@ public class OverlayCategoryPreferenceController implements Preference.OnPrefere
 
         @Override
         protected Void doInBackground(Void... params) {
-            // UserHandle.myUserId() 是 @hide 静态方法，反射调用（与 smali 取当前用户一致）
-            final int userId = myUserId();
+            // UserHandle.myUserId() 是 @hide 静态方法，经存根直接调用（与 smali 取当前用户一致）
+            final int userId = UserHandleHidden.myUserId();
             try {
                 if (mOverlayManager == null) {
                     return null;
@@ -271,26 +255,14 @@ public class OverlayCategoryPreferenceController implements Preference.OnPrefere
                 if (PACKAGE_DEVICE_DEFAULT.equals(mNewPackage)) {
                     // 选“设备默认”：禁用当前已启用包
                     if (!TextUtils.isEmpty(mCurrentPackage)) {
-                        Method m = mOverlayManager.getClass()
-                                .getMethod("setEnabled", String.class, boolean.class, int.class);
-                        m.invoke(mOverlayManager, mCurrentPackage, false, userId);
+                        mOverlayManager.setEnabled(mCurrentPackage, false, userId);
                     }
                 } else {
                     // smali: mOverlayManager.setEnabledExclusiveInCategory(mNewPackage, userId)
-                    Method m = mOverlayManager.getClass()
-                            .getMethod("setEnabledExclusiveInCategory", String.class, int.class);
-                    m.invoke(mOverlayManager, mNewPackage, userId);
+                    mOverlayManager.setEnabledExclusiveInCategory(mNewPackage, userId);
                 }
-            } catch (InvocationTargetException ite) {
-                // 反射调用底层 AIDL：解包 RemoteException 后记录
-                Throwable cause = ite.getCause();
-                if (cause instanceof RemoteException) {
-                    Log.w(TAG, "setEnabled failed (RemoteException)", (RemoteException) cause);
-                } else {
-                    Log.w(TAG, "setEnabled failed", cause);
-                }
-            } catch (Throwable t) {
-                Log.w(TAG, "setEnabled failed", t);
+            } catch (RemoteException e) {
+                Log.w(TAG, "setEnabled failed (RemoteException)", e);
             }
             return null;
         }
@@ -303,66 +275,15 @@ public class OverlayCategoryPreferenceController implements Preference.OnPrefere
     }
 
     // ------------------------------------------------------------------
-    // 反射工具
+    // 隐藏 API 访问（经 hidden-api 存根，直接链接方式调用）
     // ------------------------------------------------------------------
 
     /** 通过 ServiceManager.getService("overlay") + IOverlayManager.Stub.asInterface 获取 IOverlayManager */
-    private static Object getIOverlayManager() {
-        try {
-            Class<?> sm = Class.forName("android.os.ServiceManager");
-            IBinder binder = (IBinder) sm.getMethod("getService", String.class)
-                    .invoke(null, "overlay");
-            if (binder == null) {
-                return null;
-            }
-            Class<?> stub = Class.forName("android.content.om.IOverlayManager$Stub");
-            return stub.getMethod("asInterface", IBinder.class).invoke(null, binder);
-        } catch (Throwable t) {
-            Log.w(TAG, "getIOverlayManager failed", t);
+    private static IOverlayManager getIOverlayManager() {
+        IBinder binder = ServiceManagerHidden.getService("overlay");
+        if (binder == null) {
             return null;
         }
-    }
-
-    private static boolean isEnabled(Object info) {
-        try {
-            Method m = info.getClass().getMethod("isEnabled");
-            return (boolean) m.invoke(info);
-        } catch (Throwable t) {
-            return false;
-        }
-    }
-
-    private static <T> T getOverlayInfoField(Object info, String name, Class<T> type) {
-        try {
-            Field f = findField(info.getClass(), name);
-            if (f != null) {
-                f.setAccessible(true);
-                return type.cast(f.get(info));
-            }
-        } catch (Throwable t) {
-            // ignore
-        }
-        return null;
-    }
-
-    private static Field findField(Class<?> clazz, String name) {
-        for (Class<?> c = clazz; c != null; c = c.getSuperclass()) {
-            try {
-                return c.getDeclaredField(name);
-            } catch (NoSuchFieldException e) {
-                // continue up
-            }
-        }
-        return null;
-    }
-
-    /** 反射调用 android.os.UserHandle.myUserId() 获取当前用户 id */
-    private static int myUserId() {
-        try {
-            Method m = Class.forName("android.os.UserHandle").getMethod("myUserId");
-            return (int) m.invoke(null);
-        } catch (Throwable t) {
-            return 0;
-        }
+        return IOverlayManager.Stub.asInterface(binder);
     }
 }
