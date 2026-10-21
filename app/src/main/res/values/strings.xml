@@ -42,7 +42,7 @@
 
     <!-- 分组标题 -->
     <string name="section_personalization"></string>
-    <string name="section_basic"></string>
+    <string name="section_basic">T1</string>
     <string name="section_animation">动画演示</string>
     <string name="section_module">模块</string>
 

@@ -7,6 +7,8 @@
 
     <style name="Open.MigPreference" parent="Theme.SystemServices">
         <!-- Hello -->
+        <item name="android:listDivider">@null</item>
+        <item name="android:dividerHeight">0dp</item>
     </style>
 
     <style name="Theme.InstallerXUI" parent="android:Theme.Material.Light.NoActionBar" />
