@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 /** 下拉菜单版本开关：true 用新版（可滚动），false 用旧版（不可滚动） */
-var useNewDropdownPopup by rememberSaveable { mutableStateOf(context.resources.getBoolean(R.bool.new_popup)) }
+var useNewDropdownPopup by mutableStateOf(false)
 /**
  * The shared layout shell for expressive dropdown menus.
  *
@@ -31,7 +31,6 @@ var useNewDropdownPopup by rememberSaveable { mutableStateOf(context.resources.g
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GroupedDropdownMenuPopup(
-    useNewDropdownPopup: Boolean = true,
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     groupSizes: List<Int>,
