@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -59,11 +60,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
@@ -72,7 +76,9 @@ import androidx.compose.ui.unit.dp
 import com.android.ty.systemservices.compose.LabActivity
 import com.android.ty.systemservices.R
 import com.android.ty.systemservices.compose.ui.animation.InteractiveHighlight
+import com.android.ty.systemservices.compose.ui.theme.CyanBlue
 import com.android.ty.systemservices.compose.ui.widget.BaseWidget
+import com.android.ty.systemservices.compose.ui.widget.BaseWidget_Seek
 import com.android.ty.systemservices.compose.ui.widget.NavigationItemWidget
 import com.android.ty.systemservices.compose.ui.widget.SegmentedColumn
 import com.android.ty.systemservices.compose.ui.widget.StatusCard
@@ -83,6 +89,8 @@ import com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveBackBut
 import com.android.ty.systemservices.compose.ui.widget.menu.useNewDropdownPopup
 import com.android.ty.systemservices.compose.ui.widget.ExpandableCard
 import com.android.ty.systemservices.service.OverlayPreferenceSettings
+
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -203,6 +211,9 @@ fun PreferencesScreen() {
                             },
                         )
                     }
+                    item {
+                        ExpressiveSeekBarItem()
+                    }
                 }
             }
 
@@ -298,4 +309,25 @@ private fun HighlightableCard() {
             }
         }
     }
+}
+
+/**
+ * M3 滑杆条目：真正的排版全部交给 [BaseWidget_Seek]，
+ * 这里只负责持有进度状态，保证与同组其它条目同一套边距 / 圆角 / 水波纹。
+ */
+@Composable
+private fun ExpressiveSeekBarItem() {
+    // 旋转屏幕后保留进度
+    var progress by rememberSaveable { mutableFloatStateOf(40f) }
+
+    BaseWidget_Seek(
+        icon = Icons.Filled.Tune,
+        title = stringResource(R.string.expressive_seekbar_title),
+        description = stringResource(R.string.expressive_seekbar_desc),
+        valueText = progress.roundToInt().toString(),
+        progress = progress,
+        onProgressChange = { progress = it },
+        valueRange = 0f..100f,
+        steps = 9,
+    )
 }

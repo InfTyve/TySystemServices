@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
  * 目前支持：
  * - [ListPreference] → [ListPreferenceDialogFragmentCompat]
  * - [EditTextPreference] → [EditTextPreferenceDialogFragmentCompat]
+ * - [ComposeMultiSelectListPreference] → [ComposeMultiSelectListPreferenceDialogFragment]
  *
  * 以后新增自定义 Dialog Preference 只需继承 [PreferenceDialogFragmentCompat]，
  * 并在此类的 [getDialogFragment] 中添加对应分支即可。
@@ -50,6 +51,8 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat() {
     protected open fun getDialogFragment(preference: Preference): PreferenceDialogFragmentCompat? {
         return when (preference) {
             is EditTextPreference -> EditTextPreferenceDialogFragmentCompat.newInstance(preference.key)
+            is ComposeMultiSelectListPreference ->
+                ComposeMultiSelectListPreferenceDialogFragment.newInstance(preference.key)
             is ListPreference -> ListPreferenceDialogFragmentCompat.newInstance(preference.key)
             else -> null
         }

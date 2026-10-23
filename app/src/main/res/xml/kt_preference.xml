@@ -39,6 +39,13 @@
             app:otitle="折叠卡片内容"
             app:osummary="由 app:otitle / app:osummary 提供" />
 
+        <com.android.ty.systemservices.compose.ui.preference.ComposeMultiSelectListPreference
+            android:key="pref_multi_select"
+            android:title="多选示例"
+            android:summary="点击选择多个选项"
+            android:entries="@array/demo_multi_entries"
+            android:entryValues="@array/demo_multi_values" />
+
     </androidx.preference.PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>

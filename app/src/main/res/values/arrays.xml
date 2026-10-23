@@ -39,4 +39,18 @@
         <item name="@ref/200001a">Text</item>
         <item name="@ref/200001b">Jar</item>
     </array>
+
+    <!-- ComposeMultiSelectListPreference 示例数据 -->
+    <string-array name="demo_multi_entries">
+        <item>选项一</item>
+        <item>选项二</item>
+        <item>选项三</item>
+        <item>选项四</item>
+    </string-array>
+    <string-array name="demo_multi_values">
+        <item>opt_1</item>
+        <item>opt_2</item>
+        <item>opt_3</item>
+        <item>opt_4</item>
+    </string-array>
 </resources>
