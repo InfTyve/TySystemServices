@@ -12,10 +12,12 @@
     <string name="overlay_open">切换Overlay</string>
     <string name="dropdown_popup_new">新下拉菜单</string>
     <string name="dropdown_popup_new_desc">开启使用可滚动的新版下拉菜单</string>
+    <string name="overlay_dropdown_switch">Overlay 选择器使用下拉菜单</string>
+    <string name="overlay_dropdown_switch_desc">开启使用 ComposeDropDownMenuPreference，关闭使用 ComposeListPreference</string>
     <string name="big_title_one">平滑过渡</string>
     <string name="big_title_two">渐变消失</string>
     <string name="big_title_original">原顶部栏</string>
-    <string name="main_big_title_style">Preference大标题切换</string>
+    <string name="main_big_title_style">Compose大标题切换</string>
     <string name="main_big_title_desc">Compose大标题切换</string>
     <string name="big_title_style">Preference大标题切换</string>
     <string name="main_big_title_one">平滑过渡</string>

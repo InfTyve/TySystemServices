@@ -15,6 +15,7 @@ import androidx.preference.ListPreference;
 
 import com.android.ty.systemservices.R;
 import com.android.ty.systemservices.BackButtonHelper;
+import com.android.ty.systemservices.service.OverlayPreferenceSettings;
 
 public class OverlayActivity extends CollapsingToolbarBaseActivity {
 
@@ -45,8 +46,14 @@ public class OverlayActivity extends CollapsingToolbarBaseActivity {
                     "android.theme.customization.font",
                     "android.theme.customization.adaptive_icon_shape"
             };
-            // 加载 XML：三个 ListPreference 只有 key + title，entries 运行时注入
-            setPreferencesFromResource(R.xml.overlay_preferences, rootKey);
+            // 按 PreferencesScreen 里的开关选择样式：
+            // 开 → overlay_preferences.xml（ComposeDropDownMenuPreference，M3 下拉菜单）
+            // 关 → overlay_preferences_list.xml（ComposeListPreference，原生选择对话框）
+            // 开关值持久化在 SharedPreferences，重启应用后依旧生效
+            boolean useDropdown = OverlayPreferenceSettings.isDropdownEnabled(requireContext());
+            setPreferencesFromResource(
+                    useDropdown ? R.xml.overlay_preferences : R.xml.overlay_preferences_list,
+                    rootKey);
 
             mControllers = new OverlayCategoryPreferenceController[categories.length];
             PreferenceScreen screen = getPreferenceScreen();

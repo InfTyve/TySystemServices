@@ -51,7 +51,6 @@
     <string name="theme_settings_desc">深色 / 浅色 / 跟随系统</string>
     <string name="installer_settings">安装器设置</string>
     <string name="installer_settings_desc">安装模式、签名等</string>
-    <string name="big_title_style">Preference BigTitle Switch</string>
     <string name="uninstaller_settings">卸载器设置</string>
     <string name="uninstaller_settings_desc">卸载选项</string>
     <string name="lab">实验室</string>
@@ -92,7 +91,8 @@
     <string name="big_title_one">Smooth transition</string>
     <string name="big_title_two">Gradient vanishes</string>
     <string name="big_title_original">Original version</string>
-    <string name="main_big_title_style">Preference BigTitle Switch</string>
+    <string name="big_title_style">Preference BigTitle Switch</string>
+    <string name="main_big_title_style">Compose BigTitle Switch</string>
     <string name="main_big_title_desc">Compose BigTitle Switch</string>
     <string name="main_big_title_one">Smooth transition</string>
     <string name="main_big_title_two">Gradient vanishes</string>
@@ -116,6 +116,8 @@
     <!-- 下拉菜单版本开关 -->
     <string name="dropdown_popup_new">New dropdown menu</string>
     <string name="dropdown_popup_new_desc">Turn on to use the new scrollable dropdown menu, turn off to use the old version</string>
+    <string name="overlay_dropdown_switch">Overlay picker as dropdown</string>
+    <string name="overlay_dropdown_switch_desc">On: ComposeDropDownMenuPreference; Off: ComposeListPreference</string>
     <string name="compose_settings">Settings</string>
     <string name="status_bar_settings">Status Bar Switch</string>
     <string name="navigation_bar_settings">Navigation Bar Switch</string>

@@ -1,6 +1,7 @@
 package com.android.ty.systemservices.compose.ui.screen
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.android.ty.systemservices.compose.ui.preference.XmlPreferenceActivity
@@ -41,6 +42,7 @@ import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.TouchApp
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Card
@@ -54,6 +56,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,11 +82,17 @@ import com.android.ty.systemservices.compose.ui.widget.InfoTipCard
 import com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveBackButton
 import com.android.ty.systemservices.compose.ui.widget.menu.useNewDropdownPopup
 import com.android.ty.systemservices.compose.ui.widget.ExpandableCard
+import com.android.ty.systemservices.service.OverlayPreferenceSettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreferencesScreen() {
     val context = LocalContext.current
+    // 启动时从 SharedPreferences 恢复下拉菜单新/旧版开关（默认 false）
+    LaunchedEffect(Unit) {
+        useNewDropdownPopup = context.getSharedPreferences("systemservices_settings", Context.MODE_PRIVATE)
+            .getBoolean("new_popup", false)
+    }
     var adbVerify by remember { mutableStateOf(false) }
     var internetAccess by remember { mutableStateOf(true) }
     var ignoreBattery by remember { mutableStateOf(false) }
@@ -132,7 +141,7 @@ fun PreferencesScreen() {
                         DropDownMenuWidget(
                                 icon = Icons.Filled.Settings,
                                 title = stringResource(R.string.main_big_title_style),
-                                description = stringResource(R.string.main_big_title_desc),
+                                description = stringResource(mainTitleImpl.labelRes),
                                 choice = mainTitleImpl.ordinal,
                                 data = MainTitleImpl.entries.map { stringResource(it.labelRes) },
                                 onChoiceChange = { index ->
@@ -173,7 +182,25 @@ fun PreferencesScreen() {
                             title = stringResource(R.string.dropdown_popup_new),
                             description = stringResource(R.string.dropdown_popup_new_desc),
                             checked = useNewDropdownPopup,
-                            onCheckedChange = { useNewDropdownPopup = it },
+                            onCheckedChange = { newValue ->
+                                useNewDropdownPopup = newValue
+                                context.getSharedPreferences("systemservices_settings", Context.MODE_PRIVATE)
+                                    .edit().putBoolean("new_popup", newValue).apply()
+                            },
+                        )
+                    }
+                    item {
+                        // 控制 overlay_preferences.xml 用哪种选择器：
+                        // 开 → ComposeDropDownMenuPreference（M3 下拉菜单）
+                        // 关 → ComposeListPreference（原生选择对话框）
+                        SwitchWidget(
+                            icon = Icons.Filled.Tune,
+                            title = stringResource(R.string.overlay_dropdown_switch),
+                            description = stringResource(R.string.overlay_dropdown_switch_desc),
+                            checked = OverlayPreferenceSettings.useDropdown,
+                            onCheckedChange = { newValue ->
+                                OverlayPreferenceSettings.setDropdownEnabled(context, newValue)
+                            },
                         )
                     }
                 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.preference.PreferenceCategory
         android:key="category_general"
@@ -31,9 +32,12 @@
             android:key="pref_dev_mode"
             android:title="开发模式" />
 
-        <com.android.ty.systemservices.compose.ExpandableCardPreference
+        <com.android.ty.systemservices.compose.ui.preference.ExpandableCardPreference
             android:key="pref_expandable"
-            android:title="折叠卡片" />
+            android:title="折叠卡片"
+            android:summary="点击展开 / 收起"
+            app:otitle="折叠卡片内容"
+            app:osummary="由 app:otitle / app:osummary 提供" />
 
     </androidx.preference.PreferenceCategory>
 

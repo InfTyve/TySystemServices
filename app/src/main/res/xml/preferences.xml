@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.preference.PreferenceCategory
         android:key="category_personalization"
@@ -46,5 +47,20 @@
             android:key="about"
             android:title="关于"
             android:summary="查看版本信息" />
+    </androidx.preference.PreferenceCategory>
+
+    <!-- 可展开卡片：头部文字取 android:title / android:summary，
+         展开后的文字取 app:otitle / app:osummary -->
+    <androidx.preference.PreferenceCategory
+        android:key="category_advanced"
+        android:title="高级">
+
+        <com.android.ty.systemservices.compose.ui.preference.ExpandableCardPreference
+            android:key="pref_expandable"
+            android:title="@string/advanced_options"
+            android:summary="@string/advanced_options_hint"
+            app:iconDrawable="@drawable/ic_settings_24dp"
+            app:otitle="@string/expanded_item"
+            app:osummary="@string/expanded_item_desc" />
     </androidx.preference.PreferenceCategory>
 </androidx.preference.PreferenceScreen>
