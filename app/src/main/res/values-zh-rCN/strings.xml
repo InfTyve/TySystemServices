@@ -25,4 +25,6 @@
     <string name="compose_settings">设置</string>
     <string name="status_bar_settings">状态栏</string>
     <string name="navigation_bar_settings">导航栏</string>
+    <string name="stop_status_title">禁止下拉状态栏</string>
+    <string name="stop_status_summary">屏蔽通知栏与快捷设置的下拉手势，重启后自动恢复</string>
 </resources>

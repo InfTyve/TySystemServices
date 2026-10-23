@@ -14,8 +14,14 @@
         android:key="nvg_home"
         android:title="@string/navigation_bar_settings"
         android:defaultValue="false" />
+    <com.android.ty.systemservices.compose.ui.preference.ComposeSwitchPreference
+        android:key="stop_status"
+        android:title="@string/stop_status_title"
+        android:summary="@string/stop_status_summary"
+        android:defaultValue="false" />
     <androidx.preference.PreferenceCategory
         android:title="" />
+    
     <com.android.ty.systemservices.compose.ui.preference.ComposePreference
         android:key="open_tysettings"
         android:title="@string/compose_settings"

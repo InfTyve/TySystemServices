@@ -7,6 +7,19 @@
         android:name="android.permission.WRITE_SECURE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
 
+    <!-- 禁止下拉状态栏使用，signature|privileged，平台签名后自动授予 -->
+    <uses-permission
+        android:name="android.permission.STATUS_BAR"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- 开机后重放 disable 标志 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- enablePackage() 动态启用组件时需要，原清单漏声明 -->
+    <uses-permission
+        android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"
+        tools:ignore="ProtectedPermissions" />
+
     <application
         android:name=".service.ServiceSettings"
         android:allowBackup="true"
@@ -82,6 +95,17 @@
         <activity
             android:name=".compose.ui.preference.XmlPreferenceActivity"
             android:exported="true" />
+
+        <!-- 开机 / 覆盖安装后重新下发「禁止下拉状态栏」标志 -->
+        <receiver
+            android:name=".service.BootCompletedReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

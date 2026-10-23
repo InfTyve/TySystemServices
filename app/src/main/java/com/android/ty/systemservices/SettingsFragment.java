@@ -1,32 +1,39 @@
 package com.android.ty.systemservices;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.SwitchPreferenceCompat;
 import androidx.preference.TwoStatePreference;
 
 import com.android.ty.systemservices.Overlay.OverlayActivity;
 import com.android.ty.systemservices.compose.MingActivity;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import com.android.ty.systemservices.service.StatusBarController;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
+    private static final String TAG = "SettingsFragment";
+
     private static final String KEY_STATUS_BAR_QS = "status_bar_qs";
     private static final String KEY_NVG_HOME = "nvg_home";
+    /** 禁止下拉状态栏，key 与 settings_preferences.xml 保持一致 */
+    private static final String KEY_STOP_STATUS = StatusBarController.KEY_STOP_STATUS;
+
+    /**
+     * 使用 Application Context，避免 Fragment 已 detach 时 getContext() 返回 null
+     * 导致回调里 NPE（原实现在 onPreferenceChange 里直接 getContext()）。
+     */
+    private Context appContext;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.settings_preferences, rootKey);
+        appContext = requireContext().getApplicationContext();
 
         Preference enableSetup = findPreference("enable_setup");
         if (enableSetup != null) {
@@ -54,6 +61,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
         bindGlobalSwitch(KEY_STATUS_BAR_QS);
         bindGlobalSwitch(KEY_NVG_HOME);
+        bindStopStatusSwitch();
     }
 
     @Override
@@ -62,6 +70,10 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         // 同步当前 Settings.Global 值到开关，处理外部修改的情况
         syncGlobalSwitch(KEY_STATUS_BAR_QS);
         syncGlobalSwitch(KEY_NVG_HOME);
+
+        // disable 标志可能被系统重启清空，进页面时按持久化状态补一次，保证开关与实际一致
+        StatusBarController.reapplyIfEnabled(appContext);
+        syncStopStatusSwitch();
     }
 
     /**
@@ -74,25 +86,38 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         // 状态以 Settings.Global 为准，不让 Preference 框架自行持久化到 SharedPreferences
         pref.setPersistent(false);
         pref.setOnPreferenceChangeListener((p, newValue) -> {
-            boolean value = (Boolean) newValue;
+            boolean value = Boolean.TRUE.equals(newValue);
             try {
                 boolean ok = Settings.Global.putInt(
-                        getContext().getContentResolver(), key, value ? 1 : 0);
+                        appContext.getContentResolver(), key, value ? 1 : 0);
                 if (ok) {
-                    String state = value ? "开启 (true)" : "关闭 (false)";
-                    Toast.makeText(getContext(), key + " " + state,
-                            Toast.LENGTH_SHORT).show();
+                    toast(key + (value ? " 开启" : " 关闭"));
                     return true;  // 允许开关切换
-                } else {
-                    Toast.makeText(getContext(), key + " 设置失败",
-                            Toast.LENGTH_SHORT).show();
-                    return false;  // 写入失败，保持原状态
                 }
+                toast(key + " 设置失败");
+                return false;  // 写入失败，保持原状态
             } catch (Exception e) {
-                Toast.makeText(getContext(), key + " 设置失败: " + e.getMessage(),
-                        Toast.LENGTH_LONG).show();
+                Log.e(TAG, "write Settings.Global " + key + " failed", e);
+                toast(key + " 设置失败: " + e.getMessage());
                 return false;
             }
+        });
+    }
+
+    /**
+     * 禁止下拉状态栏：通过反射调用 StatusBarManager.disable(DISABLE_EXPAND)。
+     * 失败时返回 false，开关自动保持原状态。
+     */
+    private void bindStopStatusSwitch() {
+        TwoStatePreference pref = findPreference(KEY_STOP_STATUS);
+        if (pref == null) return;
+        pref.setPersistent(false);
+        syncStopStatusSwitch();
+        pref.setOnPreferenceChangeListener((p, newValue) -> {
+            boolean enable = Boolean.TRUE.equals(newValue);
+            StatusBarController.Result result = StatusBarController.setEnabled(appContext, enable);
+            toast(result.reason);
+            return result.success;
         });
     }
 
@@ -101,22 +126,35 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         TwoStatePreference pref = findPreference(key);
         if (pref == null) return;
         try {
-            int v = Settings.Global.getInt(getContext().getContentResolver(), key, 0);
+            int v = Settings.Global.getInt(appContext.getContentResolver(), key, 0);
             pref.setChecked(v == 1);
         } catch (Exception e) {
+            Log.e(TAG, "read Settings.Global " + key + " failed", e);
             pref.setChecked(false);
         }
     }
 
+    private void syncStopStatusSwitch() {
+        TwoStatePreference pref = findPreference(KEY_STOP_STATUS);
+        if (pref == null) return;
+        pref.setChecked(StatusBarController.isEnabled(appContext));
+    }
+
     private void enablePackage(String packageName) {
         try {
-            getContext().getPackageManager().setApplicationEnabledSetting(
+            appContext.getPackageManager().setApplicationEnabledSetting(
                     packageName,
                     PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                     0);
-            Toast.makeText(getContext(), "已启用 " + packageName, Toast.LENGTH_SHORT).show();
+            toast("已启用 " + packageName);
         } catch (Exception e) {
-            Toast.makeText(getContext(), "启用失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Log.e(TAG, "enable " + packageName + " failed", e);
+            toast("启用失败: " + e.getMessage());
         }
+    }
+
+    private void toast(String message) {
+        if (message == null || getContext() == null) return;
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 }

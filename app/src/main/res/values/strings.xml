@@ -121,4 +121,6 @@
     <string name="compose_settings">Settings</string>
     <string name="status_bar_settings">Status Bar Switch</string>
     <string name="navigation_bar_settings">Navigation Bar Switch</string>
+    <string name="stop_status_title">Block status bar pull-down</string>
+    <string name="stop_status_summary">Disable notification shade and quick settings; restored after reboot automatically</string>
 </resources>
