@@ -19,6 +19,12 @@
         android:title="@string/stop_status_title"
         android:summary="@string/stop_status_summary"
         android:defaultValue="false" />
+    <!-- 写 Settings.Global 的 audio_control：开 = 1，关 = 0 -->
+    <com.android.ty.systemservices.compose.ui.preference.ComposeSwitchPreference
+        android:key="audio_control"
+        android:title="@string/audio_control_title"
+        android:summary="@string/audio_control_summary"
+        android:defaultValue="false" />
     <androidx.preference.PreferenceCategory
         android:title="" />
     

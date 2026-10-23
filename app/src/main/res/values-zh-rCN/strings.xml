@@ -27,4 +27,6 @@
     <string name="navigation_bar_settings">导航栏</string>
     <string name="stop_status_title">禁止下拉状态栏</string>
     <string name="stop_status_summary">屏蔽通知栏与快捷设置的下拉手势，重启后自动恢复</string>
+    <string name="audio_control_title">音频控制</string>
+    <string name="audio_control_summary">写入 Settings.Global 的 audio_control：开启为 1，关闭为 0</string>
 </resources>

@@ -23,6 +23,8 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     private static final String KEY_NVG_HOME = "nvg_home";
     /** 禁止下拉状态栏，key 与 settings_preferences.xml 保持一致 */
     private static final String KEY_STOP_STATUS = StatusBarController.KEY_STOP_STATUS;
+    /** 音频控制：写 Settings.Global 的 audio_control（开 = 1，关 = 0） */
+    private static final String KEY_AUDIO_CONTROL = "audio_control";
 
     /**
      * 使用 Application Context，避免 Fragment 已 detach 时 getContext() 返回 null
@@ -61,6 +63,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
         bindGlobalSwitch(KEY_STATUS_BAR_QS);
         bindGlobalSwitch(KEY_NVG_HOME);
+        bindGlobalSwitch(KEY_AUDIO_CONTROL);
         bindStopStatusSwitch();
     }
 
@@ -70,6 +73,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         // 同步当前 Settings.Global 值到开关，处理外部修改的情况
         syncGlobalSwitch(KEY_STATUS_BAR_QS);
         syncGlobalSwitch(KEY_NVG_HOME);
+        syncGlobalSwitch(KEY_AUDIO_CONTROL);
 
         // disable 标志可能被系统重启清空，进页面时按持久化状态补一次，保证开关与实际一致
         StatusBarController.reapplyIfEnabled(appContext);
@@ -87,21 +91,28 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         pref.setPersistent(false);
         pref.setOnPreferenceChangeListener((p, newValue) -> {
             boolean value = Boolean.TRUE.equals(newValue);
+            String label = labelOf(p, key);
             try {
                 boolean ok = Settings.Global.putInt(
                         appContext.getContentResolver(), key, value ? 1 : 0);
                 if (ok) {
-                    toast(key + (value ? " 开启" : " 关闭"));
+                    toast(label + (value ? " 开启" : " 关闭"));
                     return true;  // 允许开关切换
                 }
-                toast(key + " 设置失败");
+                toast(label + " 设置失败");
                 return false;  // 写入失败，保持原状态
             } catch (Exception e) {
                 Log.e(TAG, "write Settings.Global " + key + " failed", e);
-                toast(key + " 设置失败: " + e.getMessage());
+                toast(label + " 设置失败: " + e.getMessage());
                 return false;
             }
         });
+    }
+
+    /** 提示文案优先用条目标题，避免把英文 key 直接抛给用户 */
+    private static String labelOf(Preference pref, String fallbackKey) {
+        CharSequence title = pref.getTitle();
+        return title == null || title.length() == 0 ? fallbackKey : title.toString();
     }
 
     /**
