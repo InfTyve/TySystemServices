@@ -35,4 +35,21 @@
     <string name="seek_mode_normal">标准</string>
     <string name="seek_mode_fine">细调</string>
     <string name="seek_mode_title">滑杆档位</string>
+
+    <!-- 移植组件分组 -->
+    <string name="section_ported">移植组件</string>
+    <string name="ported_switch_title">开关</string>
+    <string name="ported_switch_desc">整卡可点，右侧开关联动</string>
+    <string name="ported_enum_title">枚举单选</string>
+    <string name="ported_enum_desc">FlowRow 自动换行</string>
+    <string name="ported_slider_title">整数滑杆</string>
+    <string name="ported_slider_desc">点击右侧数值可精确输入</string>
+    <string name="ported_input_title">文本输入</string>
+    <string name="ported_input_desc">单行约束，回车不换行</string>
+    <string name="ported_list_title">列表单选</string>
+    <string name="ported_list_desc">展开后点选并自动收起</string>
+    <string name="ported_multi_title">列表多选</string>
+    <string name="ported_multi_desc">勾选状态实时回写</string>
+    <string name="ported_id_title">ID 列表</string>
+    <string name="ported_id_desc">IDItem(id, title) 数据</string>
 </resources>

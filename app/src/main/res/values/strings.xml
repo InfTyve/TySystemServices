@@ -131,4 +131,21 @@
     <string name="seek_mode_normal">Standard</string>
     <string name="seek_mode_fine">Fine</string>
     <string name="seek_mode_title">Slider steps</string>
+
+    <!-- Ported settings cards -->
+    <string name="section_ported">Ported components</string>
+    <string name="ported_switch_title">Switch</string>
+    <string name="ported_switch_desc">Whole card is clickable, switch on the right</string>
+    <string name="ported_enum_title">Enum radio</string>
+    <string name="ported_enum_desc">FlowRow with automatic wrapping</string>
+    <string name="ported_slider_title">Integer slider</string>
+    <string name="ported_slider_desc">Tap the value to type an exact number</string>
+    <string name="ported_input_title">Text input</string>
+    <string name="ported_input_desc">Single line, Enter will not wrap</string>
+    <string name="ported_list_title">Single choice list</string>
+    <string name="ported_list_desc">Expand, pick one, collapse automatically</string>
+    <string name="ported_multi_title">Multi choice list</string>
+    <string name="ported_multi_desc">Check states are written back instantly</string>
+    <string name="ported_id_title">ID list</string>
+    <string name="ported_id_desc">Backed by IDItem(id, title)</string>
 </resources>

@@ -19,30 +19,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
 /**
  * [BaseWidget] 的"卡片 + 内容区"版本，供移植而来的 SettingsCard 系列使用。
  *
+ * 入参只有 [SettingsItem] + 插槽：图标 / 标题 / 描述 / 可用状态全部由调用方用
+ * [SettingsItem] 声明，本组件内部完成资源解析与排版，任何界面都不需要写
+ * `stringResource` / `painterResource`。
+ *
  * 统一要点（与 [BaseWidget] / [BaseWidget_Seek] 完全一致）：
- * - 头部就是 [BaseWidget] 那套 M3 `ListItem`：24dp 前导图标 + `titleMedium` 标题 +
- *   `bodyMedium` 描述，左右 16dp、上下 12dp；
- * - 形状取 [LocalSegmentedItemShape]，放进 `SegmentedColumn` 后自动与其它条目粘连，
- *   不再需要自己算 Top / Middle / Bottom 圆角；
- * - 底色默认 `surfaceBright`，与同组条目同一张卡片；
- * - [onClick] 非空时头部带水波纹（用于开关卡整卡点击、列表卡展开），为空则无水波纹。
+ * - 头部就是 M3 `ListItem`：24dp 前导图标 + `titleMedium` 标题 + `bodyMedium` 描述，
+ *   左右 16dp、上下 12dp；
+ * - 形状取 [LocalSegmentedItemShape]，放进 `SegmentedColumn` 后自动与其它条目粘连；
+ * - 底色默认 `surfaceBright`；
+ * - [onClick] 非空时头部带水波纹（开关卡整卡点击、列表卡展开），为空则无水波纹；
+ * - [content] 插槽自动左右 16dp、底部 12dp，与头部文字对齐。
  *
- * 与 [BaseWidget] 的唯一区别：多了一个 [content] 插槽，用来放控件本体
- * （单选行 / 滑杆 / 输入框 / 展开列表），插槽自动左右 16dp、底部 12dp，与头部对齐。
- *
- * @param title 标题
+ * @param item 条目描述（图标 / 标题 / 描述 / enabled）
  * @param modifier 外部修饰符
- * @param description 可选描述
- * @param icon 可选前导图标（ImageVector）
- * @param iconRes 可选前导图标（drawable 资源 ID），优先于 [icon]
- * @param enabled 是否可用
  * @param onClick 头部点击回调，非空时带水波纹
  * @param containerColor 卡片底色，默认 surfaceBright
  * @param trailingContent 右侧附加内容（开关、箭头、数值等）
@@ -50,18 +46,17 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun BaseWidget_Luch(
-    title: String,
+    item: SettingsItem,
     modifier: Modifier = Modifier,
-    description: String? = null,
-    icon: ImageVector? = null,
-    iconRes: Int? = null,
-    enabled: Boolean = true,
     onClick: (() -> Unit)? = null,
     containerColor: Color? = null,
     trailingContent: (@Composable () -> Unit)? = null,
     content: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     val shape = LocalSegmentedItemShape.current
+    val title = item.resolvedTitle()
+    val description = item.resolvedDescription()
+    val enabled = item.enabled
     val contentAlpha = if (enabled) 1f else 0.38f
 
     val colors = ListItemDefaults.colors(
@@ -74,18 +69,24 @@ fun BaseWidget_Luch(
     )
 
     val leading: (@Composable () -> Unit)? = when {
-        iconRes != null -> {
+        item.iconRes != 0 -> {
             {
                 Icon(
-                    painter = painterResource(iconRes),
+                    painter = painterResource(item.iconRes),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
                 )
             }
         }
 
-        icon != null -> {
-            { Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(24.dp)) }
+        item.icon != null -> {
+            {
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
         }
 
         else -> null

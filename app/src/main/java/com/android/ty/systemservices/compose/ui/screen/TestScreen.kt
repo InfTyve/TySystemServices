@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -21,14 +24,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.android.ty.systemservices.R
 import com.android.ty.systemservices.compose.ui.settings.luch.EnumSettingsCard
 import com.android.ty.systemservices.compose.ui.settings.luch.IDItem
 import com.android.ty.systemservices.compose.ui.settings.luch.IntSliderSettingsCard
 import com.android.ty.systemservices.compose.ui.settings.luch.ListSettingsCard
-import com.android.ty.systemservices.compose.ui.settings.luch.SimpleIDListCard
-import com.android.ty.systemservices.compose.ui.settings.luch.StringListSettingsCard
 import com.android.ty.systemservices.compose.ui.settings.luch.SwitchSettingsCard
 import com.android.ty.systemservices.compose.ui.settings.luch.TextInputSettingsCard
+import com.android.ty.systemservices.compose.ui.widget.SegmentedColumn
+import com.android.ty.systemservices.compose.ui.widget.SettingsItem
 import com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveBackButton
 
 /** 演示用枚举 */
@@ -49,30 +53,63 @@ private val demoEntries = listOf(
     DemoEntry("a", "选项 A", "第一项说明"),
     DemoEntry("b", "选项 B", "第二项说明"),
     DemoEntry("c", "选项 C", "第三项说明"),
-    DemoEntry("d", "选项 D", "第四项说明"),
 )
 
 private val demoIdItems = listOf(
     IDItem("item_1", "条目一"),
     IDItem("item_2", "条目二"),
-    IDItem("item_3", "条目三"),
+)
+
+// 条目描述集中声明：图标 / 标题 / 描述 / 可用状态，Screen 里不再解析资源
+private val switchDemo = SettingsItem(
+    titleRes = R.string.ported_switch_title,
+    descriptionRes = R.string.ported_switch_desc,
+    iconRes = R.drawable.ic_settings_24dp,
+)
+
+private val enumDemo = SettingsItem(
+    title = "枚举单选",
+    description = "FlowRow 自动换行",
+    icon = Icons.Filled.Settings,
+)
+
+private val sliderDemo = SettingsItem(
+    title = "整数滑杆",
+    description = "点右侧数值可精确输入",
+    icon = Icons.Filled.Build,
+)
+
+private val inputDemo = SettingsItem(
+    title = "文本输入",
+    description = "单行约束",
+    icon = Icons.Filled.Settings,
+)
+
+private val listDemo = SettingsItem(
+    title = "列表单选",
+    description = "展开后点选并收起",
+    icon = Icons.Filled.Build,
+)
+
+private val disabledDemo = SettingsItem(
+    title = "禁用态",
+    description = "enabled = false",
+    icon = Icons.Filled.Build,
+    enabled = false,
 )
 
 /**
- * 移植组件预览页：把 `compose/ui/settings/luch/` 下的 SettingsCard 系列逐个摆出来，
- * 方便对照视觉效果与交互。仅在开发调试时使用。
+ * 移植组件预览页：所有条目只用 [SettingsItem] 声明外观，卡片本体负责排版。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TestScreen(onBack: () -> Unit = {}) {
     var wifi by rememberSaveable { mutableStateOf(true) }
     var volume by rememberSaveable { mutableIntStateOf(40) }
-    var deviceName by rememberSaveable { mutableStateOf("TySystemServices") }
+    var name by rememberSaveable { mutableStateOf("TySystemServices") }
     var mode by rememberSaveable { mutableStateOf(DemoMode.Standard) }
     var listId by rememberSaveable { mutableStateOf("b") }
-    var idListItem by rememberSaveable { mutableStateOf("item_2") }
-    // Set 不是 Saveable，这里只做会话内状态
-    var multiSelected by remember { mutableStateOf(setOf("a")) }
+    var expandedDemo by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -93,65 +130,48 @@ fun TestScreen(onBack: () -> Unit = {}) {
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // ---------- 基础三件套：开关 / 滑杆 / 输入框 ----------
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SectionTitle("基础卡片（Top / Middle / Bottom 粘连）")
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                SegmentedColumn(title = "全部启用") {
+                    item {
                         SwitchSettingsCard(
+                            item = switchDemo,
                             checked = wifi,
                             onCheckedChange = { wifi = it },
-                            title = "无线网络",
-                            summary = "整卡可点，右侧开关联动",
                         )
+                    }
+                    item {
+                        EnumSettingsCard(
+                            item = enumDemo.copy(description = "当前：${mode.label}"),
+                            value = mode,
+                            entries = DemoMode.entries.toList(),
+                            getRadioText = { it.label },
+                            maxItemsInEachRow = 3,
+                            onRadioClick = { mode = it },
+                        )
+                    }
+                    item {
                         IntSliderSettingsCard(
+                            item = sliderDemo,
                             value = volume,
-                            title = "音量",
-                            summary = "点击右侧数值可精确输入",
                             valueRange = 0f..100f,
                             steps = 9,
                             suffix = "%",
                             onValueChange = { volume = it },
                         )
+                    }
+                    item {
                         TextInputSettingsCard(
-                            value = deviceName,
-                            title = "设备名称",
-                            summary = "单行输入，回车不会换行",
-                            onValueChange = { deviceName = it },
+                            item = inputDemo,
+                            value = name,
+                            onValueChange = { name = it },
                         )
                     }
-                }
-            }
-
-            // ---------- 枚举单选 ----------
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SectionTitle("枚举单选（EnumSettingsCard）")
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        EnumSettingsCard(
-                            value = mode,
-                            entries = DemoMode.entries.toList(),
-                            title = "布局密度",
-                            summary = "当前：${mode.label}",
-                            getRadioText = { it.label },
-                            onRadioClick = { mode = it },
-                            maxItemsInEachRow = 3,
-                        )
-                    }
-                }
-            }
-
-            // ---------- 列表单选 ----------
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SectionTitle("列表单选（ListSettingsCard）")
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    item {
                         ListSettingsCard(
+                            item = listDemo,
                             items = demoEntries,
                             currentId = listId,
                             defaultId = "a",
-                            title = "选择一项",
-                            summary = "展开后点击即选中并自动收起",
                             getItemText = { it.title },
                             getItemId = { it.id },
                             getItemSummary = { entry ->
@@ -164,77 +184,15 @@ fun TestScreen(onBack: () -> Unit = {}) {
                             onValueChange = { listId = it.id },
                         )
                     }
-                }
-            }
-
-            // ---------- 列表多选 ----------
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SectionTitle("列表多选（StringListSettingsCard）")
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        StringListSettingsCard(
-                            items = demoEntries,
-                            selectedIds = multiSelected,
-                            onItemsChange = { checked, item ->
-                                if (checked) multiSelected + item.id else multiSelected - item.id
-                            },
-                            getItemID = { it.id },
-                            getItemText = { it.title },
-                            title = "多选示例",
-                            summary = "已选 ${multiSelected.size} 项",
-                        )
-                    }
-                }
-            }
-
-            // ---------- ID 列表 ----------
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SectionTitle("ID 列表（SimpleIDListCard）")
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        SimpleIDListCard(
-                            items = demoIdItems,
-                            currentId = idListItem,
-                            defaultId = "item_1",
-                            title = "ID 单选",
-                            summary = "使用 IDItem(id, title) 数据",
-                            onValueChange = { idListItem = it.id },
-                        )
-                    }
-                }
-            }
-
-            // ---------- 禁用态 ----------
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SectionTitle("禁用态（DisabledAlpha）")
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    item {
                         SwitchSettingsCard(
+                            item = disabledDemo,
                             checked = false,
-                            onCheckedChange = {},
-                            title = "不可用的开关",
-                            summary = "enabled = false",
-                            enabled = false,
-                        )
-                        IntSliderSettingsCard(
-                            value = 30,
-                            title = "不可用的滑杆",
-                            valueRange = 0f..100f,
-                            enabled = false,
+                            onCheckedChange = { expandedDemo = it },
                         )
                     }
                 }
             }
         }
     }
-}
-
-@Composable
-private fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 4.dp),
-    )
 }

@@ -5,7 +5,7 @@
  * 改动：
  * 1. 包名改为本项目；
  * 2. 去掉依赖 StringSettingUnit 的重载，只保留受控版本；
- * 3. 卡片底板统一为 BaseWidget_Luch，输入框放进内容插槽，与头部左右 16dp 对齐；
+ * 3. 条目描述统一用 SettingsItem，卡片走 BaseWidget_Luch；
  * 4. 原重载把 label 固定包成 `{ Text(label ?: "ignore if blank") }`，
  *    即调用方不传 label 也会出现提示文案；受控版本里 label 只在真正传入时渲染。
  */
@@ -18,21 +18,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.android.ty.systemservices.compose.ui.widget.BaseWidget_Luch
+import com.android.ty.systemservices.compose.ui.widget.SettingsItem
 
 /**
  * 文本输入卡片：标题 / 摘要 + 单行约束 + 输入框。
  */
 @Composable
 fun TextInputSettingsCard(
+    item: SettingsItem,
     value: String,
-    title: String,
-    modifier: Modifier = Modifier,
-    summary: String? = null,
-    icon: ImageVector? = null,
     onValueChange: (String) -> Unit = {},
+    modifier: Modifier = Modifier,
     isError: Boolean = false,
     label: @Composable (() -> Unit)? = null,
     supportingText: @Composable (() -> Unit)? = null,
@@ -42,10 +40,8 @@ fun TextInputSettingsCard(
     minLines: Int = 1,
 ) {
     BaseWidget_Luch(
-        title = title,
+        item = item,
         modifier = modifier,
-        description = summary,
-        icon = icon,
         content = {
             Column(
                 modifier = Modifier.fillMaxWidth(),

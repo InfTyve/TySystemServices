@@ -44,7 +44,14 @@ import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.TouchApp
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Card
@@ -73,6 +80,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.ty.systemservices.compose.LabActivity
@@ -90,6 +98,7 @@ import com.android.ty.systemservices.compose.ui.settings.luch.StringListSettings
 import com.android.ty.systemservices.compose.ui.settings.luch.SwitchSettingsCard
 import com.android.ty.systemservices.compose.ui.settings.luch.TextInputSettingsCard
 import com.android.ty.systemservices.compose.ui.widget.BaseWidget_Seek
+import com.android.ty.systemservices.compose.ui.widget.SettingsItem
 import com.android.ty.systemservices.compose.ui.widget.NavigationItemWidget
 import com.android.ty.systemservices.compose.ui.widget.SegmentedColumn
 import com.android.ty.systemservices.compose.ui.widget.StatusCard
@@ -135,6 +144,7 @@ fun PreferencesScreen() {
                 StatusCard(
                     appName = stringResource(R.string.app_name),
                     version = stringResource(R.string.status_version),
+                    icon = painterResource(id = R.drawable.ic_tyve),
                     useBlur = true,
                 )
             }
@@ -348,36 +358,81 @@ private enum class SeekStepMode(@StringRes val labelRes: Int, val steps: Int) {
     Fine(R.string.seek_mode_fine, 19),
 }
 
+// ---------------------------------------------------------------
+// 移植组件的条目描述（SettingsItem）：图标 / 标题 / 描述全部声明在这里，
+// Screen 里只引用常量，不再出现 stringResource(R.string.xxx) 这类解析代码。
+// ---------------------------------------------------------------
+
+private val seekItem = SettingsItem(
+    titleRes = R.string.expressive_seekbar_title,
+    descriptionRes = R.string.expressive_seekbar_desc,
+    icon = Icons.Filled.Tune,
+)
+
+private val switchItem = SettingsItem(
+    titleRes = R.string.ported_switch_title,
+    descriptionRes = R.string.ported_switch_desc,
+    icon = Icons.Filled.Wifi,
+)
+
+private val enumItem = SettingsItem(
+    titleRes = R.string.ported_enum_title,
+    descriptionRes = R.string.ported_enum_desc,
+    icon = Icons.Filled.List,
+)
+
+private val sliderItem = SettingsItem(
+    titleRes = R.string.ported_slider_title,
+    descriptionRes = R.string.ported_slider_desc,
+    icon = Icons.Filled.VolumeUp,
+)
+
+private val inputItem = SettingsItem(
+    titleRes = R.string.ported_input_title,
+    descriptionRes = R.string.ported_input_desc,
+    icon = Icons.Filled.Edit,
+)
+
+private val listItem = SettingsItem(
+    titleRes = R.string.ported_list_title,
+    descriptionRes = R.string.ported_list_desc,
+    icon = Icons.Filled.RadioButtonChecked,
+)
+
+private val multiItem = SettingsItem(
+    titleRes = R.string.ported_multi_title,
+    descriptionRes = R.string.ported_multi_desc,
+    icon = Icons.Filled.CheckBox,
+)
+
+private val idItem = SettingsItem(
+    titleRes = R.string.ported_id_title,
+    descriptionRes = R.string.ported_id_desc,
+    icon = Icons.Filled.Fingerprint,
+)
+
 /**
- * 滑杆条目：只做"标题 + 滑杆"，排版交给 [BaseWidget_Seek]，
- * 与同组其它条目共用一套边距 / 圆角。
- *
- * 档位不再是自己的状态，由外部传入 [steps]，方便和独立的档位卡联动。
+ * 滑杆条目：只做"标题 + 滑杆"，排版交给 [BaseWidget_Seek]。
+ * 档位由外部传入 [steps]，与独立的枚举卡联动。
  */
 @Composable
 private fun ExpressiveSeekBarItem(steps: Int) {
-    // 旋转屏幕后保留进度
     var progress by rememberSaveable { mutableFloatStateOf(40f) }
 
     BaseWidget_Seek(
-        icon = Icons.Filled.Tune,
-        title = stringResource(R.string.expressive_seekbar_title),
-        description = stringResource(R.string.expressive_seekbar_desc),
-        valueText = progress.roundToInt().toString(),
+        item = seekItem,
         progress = progress,
         onProgressChange = { progress = it },
+        valueText = progress.roundToInt().toString(),
         valueRange = 0f..100f,
         steps = steps,
     )
 }
 
 /**
- * 移植组件合集：`compose/ui/settings/luch/` 里的 SettingsCard 系列 + 本项目改造过的
- * [BaseWidget_Seek] 滑杆，统一放进同一个 [SegmentedColumn]。
- *
- * 所有卡片都用 BaseWidget 血统的排版（[BaseWidget_Luch] / [BaseWidget_Seek]），
- * 形状取 `LocalSegmentedItemShape`，所以增删条目、调整顺序时圆角会自动重新计算，
- * 不需要再手工指定 position。
+ * 移植组件合集：全部条目共用 [SettingsItem] 描述 + BaseWidget 血统的卡片，
+ * 统一放进同一个 [SegmentedColumn]，圆角由 `LocalSegmentedItemShape` 自动推导，
+ * 增删条目、调整顺序都不用改 position。
  */
 @Composable
 private fun PortedSettingsGroup(
@@ -393,52 +448,50 @@ private fun PortedSettingsGroup(
     var multiSelected by remember { mutableStateOf(setOf("a")) }
     val stepModeLabel = stringResource(stepMode.labelRes)
 
-    SegmentedColumn(title = stringResource(R.string.section_basic)) {
-        // 1. 移植：开关卡
-        // 2. 本项目改造：滑杆（BaseWidget_Seek）
+    SegmentedColumn(title = stringResource(R.string.section_ported)) {
+        item {
+            SwitchSettingsCard(
+                item = switchItem,
+                checked = wifi,
+                onCheckedChange = { wifi = it },
+            )
+        }
         item {
             ExpressiveSeekBarItem(steps = stepMode.steps)
         }
-        // 3. 移植：枚举单选（同时驱动上面的档位）
         item {
             EnumSettingsCard(
+                // 描述是"当前档位：xx"，属于运行期文案，用 copy 覆盖即可
+                item = enumItem.copy(description = "当前档位：$stepModeLabel"),
                 value = stepMode,
                 entries = SeekStepMode.entries.toList(),
-                title = "移植：枚举单选",
-                summary = "当前档位：$stepModeLabel",
                 getRadioText = { stringResource(it.labelRes) },
                 onRadioClick = onStepModeChange,
             )
         }
-        // 4. 移植：整数滑杆卡
         item {
             IntSliderSettingsCard(
+                item = sliderItem,
                 value = volume,
-                title = "移植：整数滑杆",
-                summary = "点击右侧数值可精确输入",
                 valueRange = 0f..100f,
                 steps = 9,
                 suffix = "%",
                 onValueChange = { volume = it },
             )
         }
-        // 5. 移植：文本输入
         item {
             TextInputSettingsCard(
+                item = inputItem,
                 value = deviceName,
-                title = "移植：文本输入",
-                summary = "单行约束 + 摘要",
                 onValueChange = { deviceName = it },
             )
         }
-        // 6. 移植：列表单选
         item {
             ListSettingsCard(
+                item = listItem,
                 items = portedOptions,
                 currentId = listId,
                 defaultId = "a",
-                title = "移植：列表单选",
-                summary = "展开后点选，自动收起",
                 getItemText = { it.title },
                 getItemId = { it.id },
                 getItemSummary = { option ->
@@ -451,28 +504,22 @@ private fun PortedSettingsGroup(
                 onValueChange = { listId = it.id },
             )
         }
-        // 7. 移植：列表多选
         item {
             StringListSettingsCard(
+                item = multiItem.copy(description = "已选 ${multiSelected.size} 项"),
                 items = portedOptions,
                 selectedIds = multiSelected,
-                onItemsChange = { checked, option ->
-                    if (checked) multiSelected + option.id else multiSelected - option.id
-                },
+                onSelectionChange = { multiSelected = it },
                 getItemID = { it.id },
                 getItemText = { it.title },
-                title = "移植：列表多选",
-                summary = "已选 ${multiSelected.size} 项",
             )
         }
-        // 8. 移植：ID 列表
         item {
             SimpleIDListCard(
+                item = idItem,
                 items = portedIdItems,
                 currentId = idItemId,
                 defaultId = "item_1",
-                title = "移植：ID 列表",
-                summary = "IDItem(id, title) 数据",
                 onValueChange = { idItemId = it.id },
             )
         }

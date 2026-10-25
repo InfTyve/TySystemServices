@@ -6,14 +6,11 @@
  * 1. 包名改为本项目；
  * 2. 去掉依赖 StringSettingUnit / EnumSettingUnit / StringListSettingUnit 的重载，
  *    改为受控版本（currentId + onValueChange / selectedIds + onItemsChange）；
- * 3. 卡片底板统一为 BaseWidget_Luch：头部就是 BaseWidget 的 ListItem 排版，
- *    展开的列表进内容插槽，不再自己拼接 Row/Column 与圆角；
+ * 3. 条目描述统一用 SettingsItem，卡片走 BaseWidget_Luch，展开列表进内容插槽；
  * 4. 修复 `require(items.isNotEmpty())`：原实现直接在 composition 里抛异常，
  *    空列表会让整页崩溃；改为空列表时不渲染；
- * 5. 修复 `selectedItem` 可能指向旧对象的问题：原实现 remember(currentId) 持有 item
- *    实例，items 重建后仍指向旧实例；改为只记 id，每次由 items 反查；
- * 6. 修复 SimpleIDListCard 的内边距与其它列表卡不一致（原来只有 bottom = 4.dp，
- *    列表项会贴到卡片左右边缘）。
+ * 5. 修复 `selectedItem` 可能指向旧对象的问题：改为只记 id，每次由 items 反查；
+ * 6. 修复 SimpleIDListCard 的内边距与其它列表卡不一致的问题。
  */
 
 package com.android.ty.systemservices.compose.ui.settings.luch
@@ -49,31 +46,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.android.ty.systemservices.compose.ui.widget.BaseWidget_Luch
+import com.android.ty.systemservices.compose.ui.widget.SettingsItem
 
 /** 列表类卡片的默认内边距：与内容插槽的 16dp 对齐后，列表项左右各留 8dp */
 private val DefaultItemListPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 8.dp)
 
 @Composable
 private fun <E> BaseListSettingsCard(
+    item: SettingsItem,
     items: List<E>,
     expanded: Boolean,
     onExpandChange: (Boolean) -> Unit,
-    title: String,
     itemLayout: @Composable (E) -> Unit,
     modifier: Modifier = Modifier,
-    summary: String? = null,
-    icon: ImageVector? = null,
     middleLayout: (@Composable ColumnScope.() -> Unit)? = null,
     trailingIcon: (@Composable RowScope.() -> Unit)? = null,
-    enabled: Boolean = true,
     itemListPadding: PaddingValues = DefaultItemListPadding,
 ) {
     // 禁用时自动收起，避免"展开着但不可操作"
-    LaunchedEffect(enabled) {
-        if (!enabled) onExpandChange(false)
+    LaunchedEffect(item.enabled) {
+        if (!item.enabled) onExpandChange(false)
     }
 
     val rotation by animateFloatAsState(
@@ -83,11 +77,8 @@ private fun <E> BaseListSettingsCard(
     )
 
     BaseWidget_Luch(
-        title = title,
+        item = item,
         modifier = modifier,
-        description = summary,
-        icon = icon,
-        enabled = enabled,
         onClick = { onExpandChange(!expanded) },
         trailingContent = {
             trailingIcon?.let { trailing ->
@@ -99,7 +90,7 @@ private fun <E> BaseListSettingsCard(
                 modifier = Modifier
                     .size(34.dp)
                     .rotate(rotation),
-                enabled = enabled,
+                enabled = item.enabled,
                 onClick = { onExpandChange(!expanded) },
             ) {
                 Icon(
@@ -122,8 +113,8 @@ private fun <E> BaseListSettingsCard(
                         .padding(itemListPadding),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    items.forEach { item ->
-                        itemLayout(item)
+                    items.forEach { entry ->
+                        itemLayout(entry)
                     }
                 }
             }
@@ -139,18 +130,15 @@ private fun <E> BaseListSettingsCard(
  */
 @Composable
 fun <E> ListSettingsCard(
+    item: SettingsItem,
     items: List<E>,
     currentId: String,
     defaultId: String,
-    title: String,
     modifier: Modifier = Modifier,
-    summary: String? = null,
-    icon: ImageVector? = null,
     getItemText: @Composable (E) -> String,
     getItemId: (E) -> String,
     getItemSummary: (@Composable (E) -> Unit)? = null,
     trailingIcon: (@Composable RowScope.() -> Unit)? = null,
-    enabled: Boolean = true,
     autoCollapse: Boolean = true,
     itemListPadding: PaddingValues = DefaultItemListPadding,
     onValueChange: (E) -> Unit = {},
@@ -168,31 +156,29 @@ fun <E> ListSettingsCard(
         ?: items.first()
 
     BaseListSettingsCard(
+        item = item,
         items = items,
         expanded = expanded,
         onExpandChange = { expanded = it },
-        title = title,
-        itemLayout = { item ->
+        itemLayout = { entry ->
             SimpleListItem(
                 modifier = Modifier.fillMaxWidth(),
-                selected = getItemId(selectedItem) == getItemId(item),
-                itemName = getItemText(item),
+                selected = getItemId(selectedItem) == getItemId(entry),
+                itemName = getItemText(entry),
                 summary = getItemSummary?.let { summarySlot ->
-                    { summarySlot(item) }
+                    { summarySlot(entry) }
                 },
                 onClick = {
-                    val id = getItemId(item)
+                    val id = getItemId(entry)
                     if (expanded && getItemId(selectedItem) != id) {
                         selectedId = id
-                        onValueChange(item)
+                        onValueChange(entry)
                         if (autoCollapse) expanded = false
                     }
                 },
             )
         },
         modifier = modifier,
-        summary = summary,
-        icon = icon,
         middleLayout = {
             Text(
                 modifier = Modifier.alpha(0.7f),
@@ -201,31 +187,29 @@ fun <E> ListSettingsCard(
             )
         },
         trailingIcon = trailingIcon,
-        enabled = enabled,
         itemListPadding = itemListPadding,
     )
 }
 
 /**
- * 多选列表卡片：勾选结果由 [selectedIds] 决定，变化通过 [onItemsChange] 回调。
+ * 多选列表卡片：勾选状态由 [selectedIds] 决定，变化通过 [onSelectionChange] 回传新的集合。
  *
- * @param onItemsChange 收到 (是否勾选, 条目)，返回新的 id 集合
+ * 注意：这里回传的是**计算好的新集合**，调用方直接 `selectedIds = it` 即可。
+ * 早期版本用的是 `(checked, item) -> Set`，调用方若只计算不赋值（或组件丢弃返回值），
+ * 就会出现"点了没反应"的问题，因此改成这种不易误用的形式。
  */
 @Composable
 fun <E> StringListSettingsCard(
+    item: SettingsItem,
     items: List<E>,
     selectedIds: Set<String>,
-    onItemsChange: (checked: Boolean, item: E) -> Set<String>,
+    onSelectionChange: (Set<String>) -> Unit,
     getItemID: (E) -> String,
     getItemText: @Composable (E) -> String,
-    title: String,
     modifier: Modifier = Modifier,
-    summary: String? = null,
-    icon: ImageVector? = null,
     getItemSummary: (@Composable (E) -> Unit)? = null,
     getItemCheck: (contains: Boolean) -> Boolean = { it },
     trailingIcon: (@Composable RowScope.() -> Unit)? = null,
-    enabled: Boolean = true,
     itemListPadding: PaddingValues = DefaultItemListPadding,
 ) {
     if (items.isEmpty()) return
@@ -233,30 +217,31 @@ fun <E> StringListSettingsCard(
     var expanded by remember { mutableStateOf(false) }
 
     BaseListSettingsCard(
+        item = item,
         items = items,
         expanded = expanded,
         onExpandChange = { expanded = it },
-        title = title,
-        itemLayout = { item ->
-            val contains = getItemID(item) in selectedIds
+        itemLayout = { entry ->
+            val id = getItemID(entry)
+            val contains = id in selectedIds
             SimpleListItem(
                 modifier = Modifier.fillMaxWidth(),
                 checked = getItemCheck(contains),
-                onCheckedChange = { checked ->
-                    onItemsChange(checked, item)
+                onCheckedChange = {
+                    // 以当前集合为准做增删，回调新集合；不依赖调用方返回值
+                    onSelectionChange(
+                        if (contains) selectedIds - id else selectedIds + id,
+                    )
                 },
-                itemName = getItemText(item),
+                itemName = getItemText(entry),
                 summary = getItemSummary?.let { summarySlot ->
-                    { summarySlot(item) }
+                    { summarySlot(entry) }
                 },
-                enabled = enabled,
+                enabled = item.enabled,
             )
         },
         trailingIcon = trailingIcon,
         modifier = modifier,
-        summary = summary,
-        icon = icon,
-        enabled = enabled,
         itemListPadding = itemListPadding,
     )
 }
@@ -264,28 +249,22 @@ fun <E> StringListSettingsCard(
 /** ID 型单选列表的便捷封装 */
 @Composable
 fun SimpleIDListCard(
+    item: SettingsItem,
     items: List<IDItem>,
     currentId: String,
     defaultId: String,
-    title: String,
     modifier: Modifier = Modifier,
-    summary: String? = null,
-    icon: ImageVector? = null,
-    enabled: Boolean = true,
     itemListPadding: PaddingValues = DefaultItemListPadding,
     onValueChange: (IDItem) -> Unit = {},
 ) {
     ListSettingsCard(
+        item = item,
         modifier = modifier,
         items = items,
         currentId = currentId,
         defaultId = defaultId,
-        title = title,
-        summary = summary,
-        icon = icon,
         getItemText = { it.title },
         getItemId = { it.id },
-        enabled = enabled,
         itemListPadding = itemListPadding,
         onValueChange = onValueChange,
     )

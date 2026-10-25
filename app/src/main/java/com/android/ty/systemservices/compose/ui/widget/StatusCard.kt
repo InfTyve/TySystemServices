@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import com.android.ty.systemservices.compose.ui.animation.AnimatedFluidBackground
 
@@ -29,6 +30,8 @@ fun StatusCard(
     version: String,
     modifier: Modifier = Modifier,
     useBlur: Boolean = false,
+    /** 自定义应用图标，为空时用默认的 Android 图标 */
+    icon: Painter? = null,
 ) {
     val containerColor = MaterialTheme.colorScheme.primaryContainer
 
@@ -58,11 +61,19 @@ fun StatusCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Android,
-                    contentDescription = null,
-                    modifier = Modifier.size(56.dp),
-                )
+                if (icon != null) {
+                    Icon(
+                        painter = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(56.dp),
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.Android,
+                        contentDescription = null,
+                        modifier = Modifier.size(56.dp),
+                    )
+                }
                 Text(text = appName, style = MaterialTheme.typography.titleMedium)
                 Text(text = version, style = MaterialTheme.typography.bodyMedium)
             }

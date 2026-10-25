@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
@@ -36,35 +35,30 @@ import androidx.compose.ui.unit.dp
  * - 只承担"标题 + 滑杆"这一件事，附加内容（例如枚举单选）请不要塞进来，
  *   需要组合时单独做一张卡，视觉上仍是同一套卡片。
  *
- * @param title 标题
+ * @param item 条目描述（图标 / 标题 / 描述 / enabled，支持资源 id）
  * @param progress 当前进度
  * @param onProgressChange 拖动回调
  * @param valueText 右侧显示的当前值文本
  * @param modifier 外部修饰符
- * @param description 可选副标题
  * @param valueRange 取值范围
  * @param steps 档位数（0 表示连续）
- * @param icon 可选前导图标（ImageVector）
- * @param iconRes 可选前导图标（drawable 资源 ID），优先于 [icon]
- * @param enabled 是否可用
  * @param containerColor 卡片底色，默认 surfaceBright
  */
 @Composable
 fun BaseWidget_Seek(
-    title: String,
+    item: SettingsItem,
     progress: Float,
     onProgressChange: (Float) -> Unit,
     valueText: String,
     modifier: Modifier = Modifier,
-    description: String? = null,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     steps: Int = 0,
-    icon: ImageVector? = null,
-    iconRes: Int? = null,
-    enabled: Boolean = true,
     containerColor: Color? = null,
 ) {
     val shape = LocalSegmentedItemShape.current
+    val title = item.resolvedTitle()
+    val description = item.resolvedDescription()
+    val enabled = item.enabled
 
     val colors = ListItemDefaults.colors(
         // 底色交给外层 Column，ListItem 保持透明，避免圆角处出现双层面
@@ -76,18 +70,24 @@ fun BaseWidget_Seek(
     )
 
     val leading: (@Composable () -> Unit)? = when {
-        iconRes != null -> {
+        item.iconRes != 0 -> {
             {
                 Icon(
-                    painter = painterResource(iconRes),
+                    painter = painterResource(item.iconRes),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
                 )
             }
         }
 
-        icon != null -> {
-            { Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(24.dp)) }
+        item.icon != null -> {
+            {
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
         }
 
         else -> null
