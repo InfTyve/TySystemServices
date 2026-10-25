@@ -93,6 +93,10 @@
             android:name=".compose.LabActivity"
             android:exported="false" />
         <activity
+            android:name=".compose.TestActivity"
+            android:theme="@style/Open.MigPreference"
+            android:exported="false" />
+        <activity
             android:name=".compose.ui.preference.XmlPreferenceActivity"
             android:exported="true" />
 

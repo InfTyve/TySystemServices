@@ -31,9 +31,10 @@ import androidx.compose.ui.unit.dp
  *   与同组其它条目同一套度量，卡片高度只多出滑杆本身；
  * - 形状取 [LocalSegmentedItemShape]，放进 `SegmentedColumn` 后会自动与相邻条目
  *   "粘连"：首卡只圆上角、中卡直角、末卡只圆下角、单卡四角全圆；
- * - 头部用 `ListItem(onClick = ...)` 触发，点按时有 M3 水波纹（ripple），
- *   且被 `clip(shape)` 限制在卡片圆角内；
- * - 背景色默认 `surfaceBright`，与其它条目同底色；外部传 [containerColor] 可覆盖。
+ * - **无水波纹**：整卡不可点（交互在滑杆上），头部使用非点击态 `ListItem`，
+ *   避免"点一下有涟漪但什么也没发生"的误导；
+ * - 只承担"标题 + 滑杆"这一件事，附加内容（例如枚举单选）请不要塞进来，
+ *   需要组合时单独做一张卡，视觉上仍是同一套卡片。
  *
  * @param title 标题
  * @param progress 当前进度
@@ -74,10 +75,6 @@ fun BaseWidget_Seek(
         supportingContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 
-    val supporting: (@Composable () -> Unit)? = description?.let { text ->
-        { Text(text = text, style = MaterialTheme.typography.bodyMedium) }
-    }
-
     val leading: (@Composable () -> Unit)? = when {
         iconRes != null -> {
             {
@@ -96,6 +93,9 @@ fun BaseWidget_Seek(
         else -> null
     }
 
+    val supporting: (@Composable () -> Unit)? = description?.let { text ->
+        { Text(text = text, style = MaterialTheme.typography.bodyMedium) }
+    }
 
     Column(
         modifier = modifier
@@ -104,9 +104,15 @@ fun BaseWidget_Seek(
             .background(containerColor ?: MaterialTheme.colorScheme.surfaceBright),
     ) {
         ListItem(
-            onClick = {},  // 只为水波纹：点击本身无业务动作，真正的交互在下方 Slider
-            leadingContent = leading,
+            headlineContent = {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.alpha(if (enabled) 1f else 0.38f),
+                )
+            },
             supportingContent = supporting,
+            leadingContent = leading,
             trailingContent = {
                 Text(
                     text = valueText,
@@ -115,14 +121,7 @@ fun BaseWidget_Seek(
                 )
             },
             colors = colors,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.alpha(if (enabled) 1f else 0.38f),
-            )
-        }
+        )
         Slider(
             value = progress,
             onValueChange = onProgressChange,

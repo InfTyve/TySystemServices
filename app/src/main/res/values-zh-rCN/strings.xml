@@ -31,4 +31,8 @@
     <string name="audio_control_summary">写入 Settings.Global 的 audio_control：开启为 1，关闭为 0</string>
     <string name="expressive_seekbar_title">Expressive 滑杆</string>
     <string name="expressive_seekbar_desc">拖动调整数值</string>
+    <string name="seek_mode_coarse">粗调</string>
+    <string name="seek_mode_normal">标准</string>
+    <string name="seek_mode_fine">细调</string>
+    <string name="seek_mode_title">滑杆档位</string>
 </resources>

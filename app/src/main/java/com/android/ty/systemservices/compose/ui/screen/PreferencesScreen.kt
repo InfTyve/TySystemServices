@@ -18,6 +18,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -61,6 +62,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -74,10 +76,19 @@ import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.ty.systemservices.compose.LabActivity
+import com.android.ty.systemservices.compose.TestActivity
 import com.android.ty.systemservices.R
 import com.android.ty.systemservices.compose.ui.animation.InteractiveHighlight
 import com.android.ty.systemservices.compose.ui.theme.CyanBlue
 import com.android.ty.systemservices.compose.ui.widget.BaseWidget
+import com.android.ty.systemservices.compose.ui.settings.luch.EnumSettingsCard
+import com.android.ty.systemservices.compose.ui.settings.luch.IDItem
+import com.android.ty.systemservices.compose.ui.settings.luch.IntSliderSettingsCard
+import com.android.ty.systemservices.compose.ui.settings.luch.ListSettingsCard
+import com.android.ty.systemservices.compose.ui.settings.luch.SimpleIDListCard
+import com.android.ty.systemservices.compose.ui.settings.luch.StringListSettingsCard
+import com.android.ty.systemservices.compose.ui.settings.luch.SwitchSettingsCard
+import com.android.ty.systemservices.compose.ui.settings.luch.TextInputSettingsCard
 import com.android.ty.systemservices.compose.ui.widget.BaseWidget_Seek
 import com.android.ty.systemservices.compose.ui.widget.NavigationItemWidget
 import com.android.ty.systemservices.compose.ui.widget.SegmentedColumn
@@ -105,6 +116,7 @@ fun PreferencesScreen() {
     var internetAccess by remember { mutableStateOf(true) }
     var ignoreBattery by remember { mutableStateOf(false) }
     var hideLauncherIcon by remember { mutableStateOf(false) }
+    var seekStepMode by rememberSaveable { mutableStateOf(SeekStepMode.Normal) }
     var advancedExpanded by remember { mutableStateOf(false) }
     var advancedExpanded2 by remember { mutableStateOf(false) }
     var bigTitleImpl by remember { mutableStateOf(loadBigTitleImpl(context)) }
@@ -159,6 +171,16 @@ fun PreferencesScreen() {
                                 },
                         )
                     }
+                    item {
+                        NavigationItemWidget(
+                            icon = Icons.Filled.Science,
+                            title = "TestScreen",
+                            description = "预览移植的 SettingsCard 系列组件",
+                            onClick = {
+                                context.startActivity(Intent(context, TestActivity::class.java))
+                            },
+                        )
+                    }
                     //item {
                     //    NavigationItemWidget(
                     //        icon = Icons.Filled.Science,
@@ -211,10 +233,14 @@ fun PreferencesScreen() {
                             },
                         )
                     }
-                    item {
-                        ExpressiveSeekBarItem()
-                    }
                 }
+            }
+
+            item {
+                PortedSettingsGroup(
+                    stepMode = seekStepMode,
+                    onStepModeChange = { seekStepMode = it },
+                )
             }
 
             item {
@@ -312,11 +338,24 @@ private fun HighlightableCard() {
 }
 
 /**
- * M3 滑杆条目：真正的排版全部交给 [BaseWidget_Seek]，
- * 这里只负责持有进度状态，保证与同组其它条目同一套边距 / 圆角 / 水波纹。
+ * 滑杆的档位粒度。选项与文案全部由枚举本身驱动：
+ * 条目取 `SeekStepMode.entries`（不写死列表），文案取 [labelRes]（走 string 资源，不写死字符串），
+ * 选中项只决定 [steps]，两者之间没有任何 when/if 分支映射。
+ */
+private enum class SeekStepMode(@StringRes val labelRes: Int, val steps: Int) {
+    Coarse(R.string.seek_mode_coarse, 4),
+    Normal(R.string.seek_mode_normal, 9),
+    Fine(R.string.seek_mode_fine, 19),
+}
+
+/**
+ * 滑杆条目：只做"标题 + 滑杆"，排版交给 [BaseWidget_Seek]，
+ * 与同组其它条目共用一套边距 / 圆角。
+ *
+ * 档位不再是自己的状态，由外部传入 [steps]，方便和独立的档位卡联动。
  */
 @Composable
-private fun ExpressiveSeekBarItem() {
+private fun ExpressiveSeekBarItem(steps: Int) {
     // 旋转屏幕后保留进度
     var progress by rememberSaveable { mutableFloatStateOf(40f) }
 
@@ -328,6 +367,133 @@ private fun ExpressiveSeekBarItem() {
         progress = progress,
         onProgressChange = { progress = it },
         valueRange = 0f..100f,
-        steps = 9,
+        steps = steps,
     )
 }
+
+/**
+ * 移植组件合集：`compose/ui/settings/luch/` 里的 SettingsCard 系列 + 本项目改造过的
+ * [BaseWidget_Seek] 滑杆，统一放进同一个 [SegmentedColumn]。
+ *
+ * 所有卡片都用 BaseWidget 血统的排版（[BaseWidget_Luch] / [BaseWidget_Seek]），
+ * 形状取 `LocalSegmentedItemShape`，所以增删条目、调整顺序时圆角会自动重新计算，
+ * 不需要再手工指定 position。
+ */
+@Composable
+private fun PortedSettingsGroup(
+    stepMode: SeekStepMode,
+    onStepModeChange: (SeekStepMode) -> Unit,
+) {
+    var wifi by rememberSaveable { mutableStateOf(true) }
+    var volume by rememberSaveable { mutableIntStateOf(40) }
+    var deviceName by rememberSaveable { mutableStateOf("TySystemServices") }
+    var listId by rememberSaveable { mutableStateOf("b") }
+    var idItemId by rememberSaveable { mutableStateOf("item_2") }
+    // Set 不是 Saveable，只做会话内状态
+    var multiSelected by remember { mutableStateOf(setOf("a")) }
+    val stepModeLabel = stringResource(stepMode.labelRes)
+
+    SegmentedColumn(title = stringResource(R.string.section_basic)) {
+        // 1. 移植：开关卡
+        // 2. 本项目改造：滑杆（BaseWidget_Seek）
+        item {
+            ExpressiveSeekBarItem(steps = stepMode.steps)
+        }
+        // 3. 移植：枚举单选（同时驱动上面的档位）
+        item {
+            EnumSettingsCard(
+                value = stepMode,
+                entries = SeekStepMode.entries.toList(),
+                title = "移植：枚举单选",
+                summary = "当前档位：$stepModeLabel",
+                getRadioText = { stringResource(it.labelRes) },
+                onRadioClick = onStepModeChange,
+            )
+        }
+        // 4. 移植：整数滑杆卡
+        item {
+            IntSliderSettingsCard(
+                value = volume,
+                title = "移植：整数滑杆",
+                summary = "点击右侧数值可精确输入",
+                valueRange = 0f..100f,
+                steps = 9,
+                suffix = "%",
+                onValueChange = { volume = it },
+            )
+        }
+        // 5. 移植：文本输入
+        item {
+            TextInputSettingsCard(
+                value = deviceName,
+                title = "移植：文本输入",
+                summary = "单行约束 + 摘要",
+                onValueChange = { deviceName = it },
+            )
+        }
+        // 6. 移植：列表单选
+        item {
+            ListSettingsCard(
+                items = portedOptions,
+                currentId = listId,
+                defaultId = "a",
+                title = "移植：列表单选",
+                summary = "展开后点选，自动收起",
+                getItemText = { it.title },
+                getItemId = { it.id },
+                getItemSummary = { option ->
+                    Text(
+                        text = option.desc,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                onValueChange = { listId = it.id },
+            )
+        }
+        // 7. 移植：列表多选
+        item {
+            StringListSettingsCard(
+                items = portedOptions,
+                selectedIds = multiSelected,
+                onItemsChange = { checked, option ->
+                    if (checked) multiSelected + option.id else multiSelected - option.id
+                },
+                getItemID = { it.id },
+                getItemText = { it.title },
+                title = "移植：列表多选",
+                summary = "已选 ${multiSelected.size} 项",
+            )
+        }
+        // 8. 移植：ID 列表
+        item {
+            SimpleIDListCard(
+                items = portedIdItems,
+                currentId = idItemId,
+                defaultId = "item_1",
+                title = "移植：ID 列表",
+                summary = "IDItem(id, title) 数据",
+                onValueChange = { idItemId = it.id },
+            )
+        }
+    }
+}
+
+/** 移植组件的演示数据 */
+private data class PortedOption(
+    val id: String,
+    val title: String,
+    val desc: String,
+)
+
+private val portedOptions = listOf(
+    PortedOption("a", "选项 A", "第一项说明"),
+    PortedOption("b", "选项 B", "第二项说明"),
+    PortedOption("c", "选项 C", "第三项说明"),
+)
+
+private val portedIdItems = listOf(
+    IDItem("item_1", "条目一"),
+    IDItem("item_2", "条目二"),
+    IDItem("item_3", "条目三"),
+)
