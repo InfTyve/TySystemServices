@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.TouchApp
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Fingerprint
@@ -84,6 +85,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.ty.systemservices.compose.LabActivity
+import com.android.ty.systemservices.compose.DevActivity
 import com.android.ty.systemservices.compose.TestActivity
 import com.android.ty.systemservices.R
 import com.android.ty.systemservices.compose.ui.animation.InteractiveHighlight
@@ -183,11 +185,11 @@ fun PreferencesScreen() {
                     }
                     item {
                         NavigationItemWidget(
-                            icon = Icons.Filled.Science,
-                            title = "TestScreen",
-                            description = "预览移植的 SettingsCard 系列组件",
+                            icon = Icons.Filled.BugReport,
+                            title = stringResource(R.string.dev_title),
+                            description = stringResource(R.string.dev_test_mode_title),
                             onClick = {
-                                context.startActivity(Intent(context, TestActivity::class.java))
+                                context.startActivity(Intent(context, DevActivity::class.java))
                             },
                         )
                     }
@@ -244,13 +246,6 @@ fun PreferencesScreen() {
                         )
                     }
                 }
-            }
-
-            item {
-                PortedSettingsGroup(
-                    stepMode = seekStepMode,
-                    onStepModeChange = { seekStepMode = it },
-                )
             }
 
             item {

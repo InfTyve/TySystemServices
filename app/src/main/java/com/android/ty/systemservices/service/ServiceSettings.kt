@@ -27,6 +27,9 @@ class ServiceSettings : Application() {
         // 全局加载 Overlay 页选择器样式开关（默认开启 = M3 下拉菜单），重启应用后仍生效
         OverlayPreferenceSettings.load(this)
 
+        // TestMode 悬浮窗：按持久化状态恢复（重启应用后开关仍然有效）
+        TestModeOverlay.restore(this)
+
         // StatusBarManager 的 disable 标志只存在 system_server 内存中，
         // 进程重新拉起（含开机、覆盖安装）时按持久化状态补下发一次，避免开关与实际不一致
         StatusBarController.reapplyIfEnabled(this)

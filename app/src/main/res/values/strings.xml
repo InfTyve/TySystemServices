@@ -148,4 +148,11 @@
     <string name="ported_multi_desc">Check states are written back instantly</string>
     <string name="ported_id_title">ID list</string>
     <string name="ported_id_desc">Backed by IDItem(id, title)</string>
+
+    <!-- Developer page -->
+    <string name="dev_title">Developer</string>
+    <string name="dev_test_mode_title">TestMode overlay</string>
+    <string name="dev_test_mode_desc">Floats above every app, indicator only, never blocks touches</string>
+    <string name="dev_overlay_permission_hint">"Display over other apps" is not granted yet; toggling will open the permission page</string>
+    <string name="dev_title_test_mode">DeveloperDebugMode</string>
 </resources>

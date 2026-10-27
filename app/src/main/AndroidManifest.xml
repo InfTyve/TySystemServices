@@ -12,6 +12,11 @@
         android:name="android.permission.STATUS_BAR"
         tools:ignore="ProtectedPermissions" />
 
+    <!-- TestMode 悬浮窗（开发调试页使用），系统应用默认已授予 -->
+    <uses-permission
+        android:name="android.permission.SYSTEM_ALERT_WINDOW"
+        tools:ignore="ProtectedPermissions" />
+
     <!-- 开机后重放 disable 标志 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -91,6 +96,10 @@
             android:exported="true" />
         <activity
             android:name=".compose.LabActivity"
+            android:exported="false" />
+        <activity
+            android:name=".compose.DevActivity"
+            android:theme="@style/Open.MigPreference"
             android:exported="false" />
         <activity
             android:name=".compose.TestActivity"
