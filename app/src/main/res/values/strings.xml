@@ -160,4 +160,8 @@
     <string name="dev_test_mode_overlay">DeveloperDebugMode \n By TeYun</string>
     <string name="dev_preview_overlay">Dev Preview</string>
     <string name="dev_preview_overlay_en">Dev Preview</string>
+
+    <!-- Developer page: setup wizard check -->
+    <string name="dev_setup_check_title">Setup wizard check</string>
+    <string name="dev_setup_check_desc">Checks device_provisioned, user_setup_complete and setup_wizard_has_run; launches com.android.setup.MainActivity when all are 0</string>
 </resources>

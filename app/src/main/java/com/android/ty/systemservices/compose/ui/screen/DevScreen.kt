@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -28,6 +29,7 @@ import com.android.ty.systemservices.R
 import com.android.ty.systemservices.compose.ui.widget.InfoTipCard
 import com.android.ty.systemservices.compose.ui.widget.SegmentedColumn
 import com.android.ty.systemservices.compose.ui.widget.SwitchWidget
+import com.android.ty.systemservices.service.ServiceDaemon
 import com.android.ty.systemservices.service.TestModeOverlay
 
 /**
@@ -44,6 +46,7 @@ fun DevScreen() {
     val context = LocalContext.current
     var enabled by remember { mutableStateOf(TestModeOverlay.isEnabled(context)) }
     var hasPermission by remember { mutableStateOf(TestModeOverlay.canDrawOverlays(context)) }
+    var checkSetupWizard by remember { mutableStateOf(ServiceDaemon.isSetupCheckEnabled(context)) }
 
     // 从系统授权页返回时刷新权限与开关状态
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -91,6 +94,18 @@ fun DevScreen() {
                                     enabled = TestModeOverlay.setEnabled(context, want)
                                     hasPermission = TestModeOverlay.canDrawOverlays(context)
                                 }
+                            },
+                        )
+                    }
+                    item {
+                        SwitchWidget(
+                            icon = Icons.Filled.Checklist,
+                            title = stringResource(R.string.dev_setup_check_title),
+                            description = stringResource(R.string.dev_setup_check_desc),
+                            checked = checkSetupWizard,
+                            onCheckedChange = { want ->
+                                checkSetupWizard = want
+                                ServiceDaemon.setSetupCheckEnabled(context, want)
                             },
                         )
                     }

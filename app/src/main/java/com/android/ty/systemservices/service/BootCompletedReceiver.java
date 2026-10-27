@@ -40,6 +40,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         TestModeOverlay.restore(context);
 
         // 拉起守护服务（START_STICKY + 闹钟 + system_server 心跳）
-        OverlayDaemon.start(context);
+        ServiceDaemon.start(context);
     }
 }

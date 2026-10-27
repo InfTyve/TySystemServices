@@ -109,4 +109,8 @@
     <string name="dev_preview_overlay">预览开发阶段</string>
     <string name="dev_preview_overlay_en">Dev Preview</string>
     <string name="dev_test_mode_overlay">开发调试模式 \n By TeYun</string>
+
+    <!-- 开发调试页：开机向导检测开关 -->
+    <string name="dev_setup_check_title">开机向导检测</string>
+    <string name="dev_setup_check_desc">检测 device_provisioned、user_setup_complete、setup_wizard_has_run，三者都为 0 时拉起 com.android.setup.MainActivity</string>
 </resources>

@@ -11,7 +11,7 @@ import android.util.Log
  * 启动链路：
  * ```
  * system_server (OverlayBoot)
- *   └─ startServiceAsUser(OverlayDaemonService)
+ *   └─ startServiceAsUser(ServiceDaemonService)
  *        └─ onCreate / onStartCommand → TestModeOverlay.restore()
  *             └─ WindowManager.addView(TYPE_APPLICATION_OVERLAY)
  * ```
@@ -21,7 +21,7 @@ import android.util.Log
  * - `onTaskRemoved` / `onDestroy`：补排一次闹钟，避免被一次性杀掉后再也起不来；
  * - 开关关闭时立即 `stopSelf()`，不留常驻进程。
  */
-class OverlayDaemonService : Service() {
+class ServiceDaemonService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -38,19 +38,23 @@ class OverlayDaemonService : Service() {
 
     /** 统一入口：开关开着就恢复浮层并续订闹钟，关着就自己退出 */
     private fun sync() {
+        // system_server 心跳可能绕过 ServiceDaemon.start 直接拉起本服务，
+        // 这里再检测一次开机向导状态，保证两条链路行为一致
+        ServiceDaemon.launchSetupWizardIfNeeded(this)
+
         if (!TestModeOverlay.isEnabled(this)) {
             Log.i(TAG, "overlay disabled, stopping daemon")
             stopSelf()
             return
         }
         TestModeOverlay.restore(this)
-        OverlayDaemon.schedule(this, OverlayDaemon.HEARTBEAT_INTERVAL_MS)
+        ServiceDaemon.schedule(this, ServiceDaemon.HEARTBEAT_INTERVAL_MS)
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         // 用户从最近任务划掉应用时，尽快唤醒一次（服务本身可能随后被停）
         if (TestModeOverlay.isEnabled(this)) {
-            OverlayDaemon.schedule(this, 1_500L)
+            ServiceDaemon.schedule(this, 1_500L)
         }
         super.onTaskRemoved(rootIntent)
     }
@@ -58,13 +62,13 @@ class OverlayDaemonService : Service() {
     override fun onDestroy() {
         // 被系统杀掉/主动停止时补一次闹钟；开关已关就不再排，避免无限拉起
         if (TestModeOverlay.isEnabled(this)) {
-            OverlayDaemon.schedule(this, 5_000L)
+            ServiceDaemon.schedule(this, 5_000L)
         }
         Log.i(TAG, "daemon service destroyed")
         super.onDestroy()
     }
 
     private companion object {
-        const val TAG = "OverlayDaemonService"
+        const val TAG = "ServiceDaemonService"
     }
 }

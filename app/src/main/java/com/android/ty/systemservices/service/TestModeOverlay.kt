@@ -75,7 +75,7 @@ object TestModeOverlay {
             // 先让 system_server 停止唤醒，再停本地守护，顺序不能反
             syncGlobalFlag(app, false)
             // 关掉开关就不再需要常驻守护：取消闹钟并停掉 service
-            OverlayDaemon.stop(app)
+            ServiceDaemon.stop(app)
             return false
         }
 
@@ -84,7 +84,7 @@ object TestModeOverlay {
         prefs.edit().putBoolean(KEY_ENABLED, shown).apply()
         syncGlobalFlag(app, shown)
         // 开启后交给守护体系：START_STICKY + 闹钟 + system_server 心跳三重兜底
-        if (shown) OverlayDaemon.start(app) else OverlayDaemon.stop(app)
+        if (shown) ServiceDaemon.start(app) else ServiceDaemon.stop(app)
         return shown
     }
 
