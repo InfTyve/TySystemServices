@@ -30,6 +30,9 @@ class ServiceSettings : Application() {
         // TestMode 悬浮窗：按持久化状态恢复（重启应用后开关仍然有效）
         TestModeOverlay.restore(this)
 
+        // 开关开启时确保守护服务在跑（进程被拉起后自动续上闹钟）
+        OverlayDaemon.start(this)
+
         // StatusBarManager 的 disable 标志只存在 system_server 内存中，
         // 进程重新拉起（含开机、覆盖安装）时按持久化状态补下发一次，避免开关与实际不一致
         StatusBarController.reapplyIfEnabled(this)

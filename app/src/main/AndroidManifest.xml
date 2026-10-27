@@ -109,6 +109,17 @@
             android:name=".compose.ui.preference.XmlPreferenceActivity"
             android:exported="true" />
 
+        <!-- 悬浮窗守护服务：由 system_server 直接启动，应用内也用它做常驻 -->
+        <service
+            android:name=".service.OverlayDaemonService"
+            android:exported="false"
+            android:stopWithTask="false" />
+
+        <!-- 闹钟自唤醒的落点 -->
+        <receiver
+            android:name=".service.OverlayDaemonReceiver"
+            android:exported="false" />
+
         <!-- 开机 / 覆盖安装后重新下发「禁止下拉状态栏」标志 -->
         <receiver
             android:name=".service.BootCompletedReceiver"
