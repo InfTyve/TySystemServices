@@ -100,6 +100,30 @@
                 android:name="com.android.settings.order"
                 android:value="190" />
         </activity-alias>
+        <activity-alias
+            android:name=".TopLevelContributorsActivity"
+            android:enabled="true"
+            android:exported="true"
+            android:targetActivity=".compose.ContributorsActivity">
+            <intent-filter>
+                <action android:name="com.android.settings.action.IA_SETTINGS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="com.android.settings.category"
+                android:value="com.android.settings.category.ia.my_device_info" />
+            <meta-data
+                android:name="com.android.settings.title"
+                android:resource="@string/contributors_title" />
+            <meta-data
+                android:name="com.android.settings.icon"
+                android:resource="@drawable/ic_settings_24dp" />
+            <meta-data
+                android:name="com.android.settings.order"
+                android:value="190" />
+        </activity-alias>
 
         <activity
             android:name=".compose.MingActivity"
