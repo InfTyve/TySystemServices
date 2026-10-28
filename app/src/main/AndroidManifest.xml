@@ -112,6 +112,10 @@
             android:theme="@style/Open.MigPreference"
             android:exported="false" />
         <activity
+            android:name=".compose.ContributorsActivity"
+            android:theme="@style/Open.MigPreference"
+            android:exported="true" />
+        <activity
             android:name=".compose.TestActivity"
             android:theme="@style/Open.MigPreference"
             android:exported="false" />

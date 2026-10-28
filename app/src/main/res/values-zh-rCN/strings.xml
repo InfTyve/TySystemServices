@@ -55,6 +55,7 @@
 
     <!-- 开发调试页 -->
     <string name="dev_title">开发调试</string>
+    <string name="contributors_title">贡献者</string>
     <string name="dev_test_mode_title">TestMode 悬浮窗</string>
     <string name="dev_test_mode_desc">置于所有应用之上，仅作状态指示，不拦截触摸</string>
     <string name="dev_overlay_permission_hint">尚未授予「显示在其他应用上层」权限，点击开关会跳转授权页</string>
