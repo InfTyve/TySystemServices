@@ -1,9 +1,12 @@
 package com.android.ty.systemservices.service
 
+import android.app.ActivityManager
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
+import android.os.PowerManager
 import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
@@ -44,6 +47,21 @@ object ServiceDaemon {
     /** 系统开机向导入口 */
     private const val SETUP_PACKAGE = "com.android.setup"
     private const val SETUP_ACTIVITY = "com.android.setup.MainActivity"
+
+    /** 拉起后给 SetupWizard 的启动宽限期，避免启动间隙被误判为"不在前台" */
+    private const val LAUNCH_GRACE_MS = 90_000L
+
+    /** 两次重启的最小间隔，避免开机自检还没走完就再次重启 */
+    private const val REBOOT_COOLDOWN_MS = 5 * 60 * 1000L
+
+    /** 最多重启次数，超过后只拉起不重启（防止 setup 组件缺失导致 boot loop） */
+    private const val REBOOT_LIMIT = 3
+
+    private const val REBOOT_REASON = "enforce-setup-wizard"
+
+    private const val KEY_LAST_LAUNCH = "setup_last_launch"
+    private const val KEY_REBOOT_COUNT = "setup_reboot_count"
+    private const val KEY_LAST_REBOOT = "setup_last_reboot"
 
     /**
      * 按当前开关状态拉起或停止守护。
@@ -116,27 +134,148 @@ object ServiceDaemon {
     }
 
     /**
-     * 三个标记都为 0 时拉起 `com.android.setup.MainActivity`。
+     * `com.android.setup` 是否在前台。
      *
-     * @return 是否真的发起了启动（已初始化或组件不存在时返回 false）
+     * 只看包名，不关心是哪个 Activity，因此 SetupWizard 内部换页、拆成多个 Activity
+     * 都不会误判。两条路互相兜底：
+     * 1. `getRunningTasks(1)` 取栈顶 Activity 的包名（需要 REAL_GET_TASKS，平台签名可获得）；
+     * 2. 退化为 `runningAppProcesses` 中 importance == FOREGROUND 的进程。
+     *
+     * 两条都失败时返回 false（即"不在前台"），行为退化为不加此判断，不会卡死引导。
+     */
+    @JvmStatic
+    fun isSetupWizardForeground(context: Context): Boolean {
+        val am = context.getSystemService(ActivityManager::class.java) ?: return false
+
+        try {
+            val top = am.getRunningTasks(1).firstOrNull()?.topActivity
+            if (top?.packageName == SETUP_PACKAGE) {
+                Log.d(TAG, "setup wizard is foreground (task)")
+                return true
+            }
+        } catch (t: Throwable) {
+            Log.w(TAG, "getRunningTasks failed", t)
+        }
+
+        try {
+            val info = am.runningAppProcesses?.firstOrNull { it.processName == SETUP_PACKAGE }
+            if (info != null &&
+                info.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+            ) {
+                Log.d(TAG, "setup wizard is foreground (process)")
+                return true
+            }
+        } catch (t: Throwable) {
+            Log.w(TAG, "getRunningAppProcesses failed", t)
+        }
+
+        return false
+    }
+
+    /**
+     * 开机向导未完成时的处置入口。
+     *
+     * - 三个标记都为 0 且 setup 在前台：什么都不做，并清零重启计数；
+     * - 不在前台、但刚拉起过（< [LAUNCH_GRACE_MS]）：等它起来，避免启动间隙误判；
+     * - 不在前台、且已过宽限期：判定用户退出了引导 → **重启设备**，
+     *   重启后 [ServiceDaemonService] 会再次检测到未完成并拉起 SetupWizard；
+     * - 重启受 [REBOOT_LIMIT] 与 [REBOOT_COOLDOWN_MS] 双重限制，防止组件缺失时无限重启。
+     *
+     * @return 是否采取了动作（拉起或重启）；"等待"与"已在前台"返回 false
      */
     @JvmStatic
     fun launchSetupWizardIfNeeded(context: Context): Boolean {
         if (!isSetupWizardPending(context)) return false
-        return try {
-            val intent = Intent().apply {
-                setClassName(SETUP_PACKAGE, SETUP_ACTIVITY)
-                // 已在向导栈里时复用，避免叠出多个实例
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            }
-            context.startActivity(intent)
-            Log.i(TAG, "setup wizard launched: $SETUP_PACKAGE/$SETUP_ACTIVITY")
-            true
-        } catch (t: Throwable) {
-            // 设备上没有该组件时会抛 ActivityNotFoundException，忽略即可
-            Log.w(TAG, "launch setup wizard failed", t)
-            false
+
+        if (isSetupWizardForeground(context)) {
+            resetRebootState(context)
+            return false
         }
+
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val now = System.currentTimeMillis()
+        val lastLaunch = prefs.getLong(KEY_LAST_LAUNCH, 0L)
+
+        // 刚拉起过，给 SetupWizard 留出启动时间
+        if (lastLaunch > 0 && now - lastLaunch < LAUNCH_GRACE_MS) {
+            Log.d(TAG, "setup wizard starting, wait before judging")
+            return false
+        }
+
+        if (lastLaunch > 0) {
+            // 拉起过、宽限期已过，人却不在引导里 → 视为退出引导
+            val rebootCount = prefs.getInt(KEY_REBOOT_COUNT, 0)
+            val lastReboot = prefs.getLong(KEY_LAST_REBOOT, 0L)
+            val coolingDown = now - lastReboot < REBOOT_COOLDOWN_MS
+            if (rebootCount >= REBOOT_LIMIT || coolingDown) {
+                Log.w(TAG, "reboot suppressed (count=$rebootCount, coolingDown=$coolingDown)")
+                return launchAndMark(context, prefs, now)
+            }
+
+            prefs.edit()
+                .putInt(KEY_REBOOT_COUNT, rebootCount + 1)
+                .putLong(KEY_LAST_REBOOT, now)
+                .putLong(KEY_LAST_LAUNCH, 0L)
+                .apply()
+            Log.i(TAG, "setup wizard left foreground, rebooting (count=${rebootCount + 1})")
+            return rebootDevice(context)
+        }
+
+        return launchAndMark(context, prefs, now)
+    }
+
+    /** 拉起 SetupWizard，成功才记录时间；组件不存在时不记录，避免误触发重启 */
+    private fun launchAndMark(
+        context: Context,
+        prefs: SharedPreferences,
+        now: Long,
+    ): Boolean {
+        if (!launchSetup(context)) return false
+        prefs.edit().putLong(KEY_LAST_LAUNCH, now).apply()
+        return true
+    }
+
+    private fun launchSetup(context: Context): Boolean = try {
+        val intent = Intent().apply {
+            setClassName(SETUP_PACKAGE, SETUP_ACTIVITY)
+            // 已在向导栈里时复用，避免叠出多个实例
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+        context.startActivity(intent)
+        Log.i(TAG, "setup wizard launched: $SETUP_PACKAGE/$SETUP_ACTIVITY")
+        true
+    } catch (t: Throwable) {
+        // 设备上没有该组件时会抛 ActivityNotFoundException，忽略即可
+        Log.w(TAG, "launch setup wizard failed", t)
+        false
+    }
+
+    /** 重启设备；需要 REBOOT 权限（signature|privileged，平台签名自动授予） */
+    private fun rebootDevice(context: Context): Boolean = try {
+        val pm = context.getSystemService(PowerManager::class.java)
+        if (pm == null) {
+            Log.w(TAG, "PowerManager unavailable, reboot skipped")
+            false
+        } else {
+            pm.reboot(REBOOT_REASON)
+            true
+        }
+    } catch (t: Throwable) {
+        Log.w(TAG, "reboot failed", t)
+        false
+    }
+
+    /** 回到引导内即清零计数，下次真正退出时重新开始计 */
+    private fun resetRebootState(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        if (prefs.getInt(KEY_REBOOT_COUNT, 0) == 0 && prefs.getLong(KEY_LAST_LAUNCH, 0L) == 0L) {
+            return
+        }
+        prefs.edit()
+            .putInt(KEY_REBOOT_COUNT, 0)
+            .putLong(KEY_LAST_LAUNCH, 0L)
+            .putLong(KEY_LAST_REBOOT, 0L)
+            .apply()
     }
 
     /**
