@@ -40,7 +40,7 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_launcher_settings"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
@@ -122,7 +122,7 @@
                 android:resource="@drawable/ic_settings_24dp" />
             <meta-data
                 android:name="com.android.settings.order"
-                android:value="190" />
+                android:value="-1" />
         </activity-alias>
 
         <activity

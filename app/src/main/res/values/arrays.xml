@@ -42,10 +42,10 @@
 
     <!-- ComposeMultiSelectListPreference 示例数据 -->
     <string-array name="demo_multi_entries">
-        <item>选项一</item>
-        <item>选项二</item>
-        <item>选项三</item>
-        <item>选项四</item>
+        <item>@string/demo_multi_entry_1</item>
+        <item>@string/demo_multi_entry_2</item>
+        <item>@string/demo_multi_entry_3</item>
+        <item>@string/demo_multi_entry_4</item>
     </string-array>
     <string-array name="demo_multi_values">
         <item>opt_1</item>

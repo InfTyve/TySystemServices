@@ -23,10 +23,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.annotation.StringRes
 import com.android.ty.systemservices.R
 import com.android.ty.systemservices.compose.ui.settings.luch.EnumSettingsCard
-import com.android.ty.systemservices.compose.ui.settings.luch.IDItem
 import com.android.ty.systemservices.compose.ui.settings.luch.IntSliderSettingsCard
 import com.android.ty.systemservices.compose.ui.settings.luch.ListSettingsCard
 import com.android.ty.systemservices.compose.ui.settings.luch.SwitchSettingsCard
@@ -36,28 +38,23 @@ import com.android.ty.systemservices.compose.ui.widget.SettingsItem
 import com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveBackButton
 
 /** 演示用枚举 */
-private enum class DemoMode(val label: String) {
-    Compact("紧凑"),
-    Standard("标准"),
-    Expanded("扩展"),
+private enum class DemoMode(@StringRes val labelRes: Int) {
+    Compact(R.string.test_mode_compact),
+    Standard(R.string.test_mode_standard),
+    Expanded(R.string.test_mode_expanded),
 }
 
 /** 演示用列表项 */
 private data class DemoEntry(
     val id: String,
-    val title: String,
-    val desc: String,
+    @StringRes val titleRes: Int,
+    @StringRes val descRes: Int,
 )
 
 private val demoEntries = listOf(
-    DemoEntry("a", "选项 A", "第一项说明"),
-    DemoEntry("b", "选项 B", "第二项说明"),
-    DemoEntry("c", "选项 C", "第三项说明"),
-)
-
-private val demoIdItems = listOf(
-    IDItem("item_1", "条目一"),
-    IDItem("item_2", "条目二"),
+    DemoEntry("a", R.string.demo_option_a_title, R.string.demo_option_a_summary),
+    DemoEntry("b", R.string.demo_option_b_title, R.string.demo_option_b_summary),
+    DemoEntry("c", R.string.demo_option_c_title, R.string.demo_option_c_summary),
 )
 
 // 条目描述集中声明：图标 / 标题 / 描述 / 可用状态，Screen 里不再解析资源
@@ -68,32 +65,32 @@ private val switchDemo = SettingsItem(
 )
 
 private val enumDemo = SettingsItem(
-    title = "枚举单选",
-    description = "FlowRow 自动换行",
+    titleRes = R.string.test_demo_enum_title,
+    descriptionRes = R.string.test_demo_enum_desc,
     icon = Icons.Filled.Settings,
 )
 
 private val sliderDemo = SettingsItem(
-    title = "整数滑杆",
-    description = "点右侧数值可精确输入",
+    titleRes = R.string.test_demo_slider_title,
+    descriptionRes = R.string.test_demo_slider_desc,
     icon = Icons.Filled.Build,
 )
 
 private val inputDemo = SettingsItem(
-    title = "文本输入",
-    description = "单行约束",
+    titleRes = R.string.test_demo_input_title,
+    descriptionRes = R.string.test_demo_input_desc,
     icon = Icons.Filled.Settings,
 )
 
 private val listDemo = SettingsItem(
-    title = "列表单选",
-    description = "展开后点选并收起",
+    titleRes = R.string.test_demo_list_title,
+    descriptionRes = R.string.test_demo_list_desc,
     icon = Icons.Filled.Build,
 )
 
 private val disabledDemo = SettingsItem(
-    title = "禁用态",
-    description = "enabled = false",
+    titleRes = R.string.test_demo_disabled_title,
+    descriptionRes = R.string.test_demo_disabled_desc,
     icon = Icons.Filled.Build,
     enabled = false,
 )
@@ -106,7 +103,8 @@ private val disabledDemo = SettingsItem(
 fun TestScreen(onBack: () -> Unit = {}) {
     var wifi by rememberSaveable { mutableStateOf(true) }
     var volume by rememberSaveable { mutableIntStateOf(40) }
-    var name by rememberSaveable { mutableStateOf("TySystemServices") }
+    val defaultName = LocalContext.current.getString(R.string.demo_device_name)
+    var name by rememberSaveable { mutableStateOf(defaultName) }
     var mode by rememberSaveable { mutableStateOf(DemoMode.Standard) }
     var listId by rememberSaveable { mutableStateOf("b") }
     var expandedDemo by remember { mutableStateOf(false) }
@@ -115,7 +113,7 @@ fun TestScreen(onBack: () -> Unit = {}) {
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
-                title = { Text(text = "TestScreen") },
+                title = { Text(text = stringResource(R.string.test_screen_title)) },
                 navigationIcon = { ExpressiveBackButton(onClick = onBack) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -131,7 +129,7 @@ fun TestScreen(onBack: () -> Unit = {}) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
-                SegmentedColumn(title = "全部启用") {
+                SegmentedColumn(title = stringResource(R.string.test_section_all_enabled)) {
                     item {
                         SwitchSettingsCard(
                             item = switchDemo,
@@ -141,10 +139,15 @@ fun TestScreen(onBack: () -> Unit = {}) {
                     }
                     item {
                         EnumSettingsCard(
-                            item = enumDemo.copy(description = "当前：${mode.label}"),
+                            item = enumDemo.copy(
+                                description = stringResource(
+                                    R.string.demo_current_mode,
+                                    stringResource(mode.labelRes),
+                                ),
+                            ),
                             value = mode,
                             entries = DemoMode.entries.toList(),
-                            getRadioText = { it.label },
+                            getRadioText = { stringResource(it.labelRes) },
                             maxItemsInEachRow = 3,
                             onRadioClick = { mode = it },
                         )
@@ -172,11 +175,11 @@ fun TestScreen(onBack: () -> Unit = {}) {
                             items = demoEntries,
                             currentId = listId,
                             defaultId = "a",
-                            getItemText = { it.title },
+                            getItemText = { stringResource(it.titleRes) },
                             getItemId = { it.id },
                             getItemSummary = { entry ->
                                 Text(
-                                    text = entry.desc,
+                                    text = stringResource(entry.descRes),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )

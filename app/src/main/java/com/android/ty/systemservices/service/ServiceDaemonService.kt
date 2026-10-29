@@ -48,7 +48,8 @@ class ServiceDaemonService : Service() {
             return
         }
         TestModeOverlay.restore(this)
-        ServiceDaemon.schedule(this, ServiceDaemon.HEARTBEAT_INTERVAL_MS)
+        // 处于开机向导倒计时窗口时排 5s 密集采样，其余时间回到 5 分钟心跳
+        ServiceDaemon.schedule(this, ServiceDaemon.nextWakeDelayMs(this))
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {

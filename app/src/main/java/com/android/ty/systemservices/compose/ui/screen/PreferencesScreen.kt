@@ -2,6 +2,7 @@ package com.android.ty.systemservices.compose.ui.screen
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import android.content.Intent
 import android.os.Build
 import com.android.ty.systemservices.compose.ui.preference.XmlPreferenceActivity
@@ -20,6 +21,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -46,9 +48,11 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.VolumeUp
@@ -110,6 +114,10 @@ import com.android.ty.systemservices.compose.ui.widget.InfoTipCard
 import com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveBackButton
 import com.android.ty.systemservices.compose.ui.widget.menu.useNewDropdownPopup
 import com.android.ty.systemservices.compose.ui.widget.ExpandableCard
+import com.android.ty.systemservices.compose.ui.util.SecretGate
+import com.android.ty.systemservices.compose.ui.widget.AppSnackbarHost
+import com.android.ty.systemservices.compose.ui.widget.PasswordPromptDialog
+import com.android.ty.systemservices.compose.ui.widget.rememberAppSnackbarState
 import com.android.ty.systemservices.service.OverlayPreferenceSettings
 
 import kotlin.math.roundToInt
@@ -133,8 +141,21 @@ fun PreferencesScreen() {
     var bigTitleImpl by remember { mutableStateOf(loadBigTitleImpl(context)) }
     var mainTitleImpl by remember { mutableStateOf(loadMainTitleImpl(context)) }
 
+    // 开发调试入口：连点 10 次解锁，本次会话内解锁后不再重复验证
+    var devTapCount by rememberSaveable { mutableIntStateOf(0) }
+    var devUnlocked by rememberSaveable { mutableStateOf(false) }
+    var showPasswordDialog by rememberSaveable { mutableStateOf(false) }
+    val snackbar = rememberAppSnackbarState()
+
+    // DevActivity 有入口校验：每次进入都必须先签发一次性票据，否则会被直接挡回
+    val openDev = {
+        SecretGate.issueLaunchTicket(context)
+        context.startActivity(Intent(context, DevActivity::class.java))
+    }
+
     // 主页大标题头部由 MingActivity 的 CollapsingToolbarBaseActivity 承载，
     // 这里不再包 Scaffold/TopAppBar；LazyColumn 必须带 nestedScroll 才能联动 AppBar 折叠。
+    Box(modifier = Modifier.fillMaxSize()) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -185,11 +206,28 @@ fun PreferencesScreen() {
                     }
                     item {
                         NavigationItemWidget(
-                            icon = Icons.Filled.BugReport,
+                            icon = Icons.Filled.Code,
                             title = stringResource(R.string.dev_title),
                             description = stringResource(R.string.dev_test_mode_title),
                             onClick = {
-                                context.startActivity(Intent(context, DevActivity::class.java))
+                                if (devUnlocked) {
+                                    openDev()
+                                } else {
+                                    val taps = devTapCount + 1
+                                    Log.d("DevGate", "tap=$taps")
+                                    if (taps >= SecretGate.REQUIRED_TAPS) {
+                                        devTapCount = SecretGate.REQUIRED_TAPS
+                                        showPasswordDialog = true
+                                    } else {
+                                        devTapCount = taps
+                                        snackbar.show(
+                                            context.getString(
+                                                R.string.dev_unlock_remaining_taps,
+                                                SecretGate.REQUIRED_TAPS - taps,
+                                            ),
+                                        )
+                                    }
+                                }
                             },
                         )
                     }
@@ -283,6 +321,35 @@ fun PreferencesScreen() {
                 HighlightableCard()
             }
         }
+
+        AppSnackbarHost(state = snackbar)
+    }
+
+    if (showPasswordDialog) {
+        PasswordPromptDialog(
+            title = stringResource(R.string.dev_unlock_dialog_title),
+            message = stringResource(R.string.dev_unlock_dialog_message),
+            label = stringResource(R.string.dev_unlock_password_label),
+            errorText = stringResource(R.string.dev_unlock_password_error),
+            confirmText = stringResource(R.string.dev_unlock_confirm),
+            dismissText = stringResource(R.string.dev_unlock_cancel),
+            showPasswordText = stringResource(R.string.dev_unlock_show_password),
+            hidePasswordText = stringResource(R.string.dev_unlock_hide_password),
+            onConfirm = { input ->
+                val ok = SecretGate.verify(input)
+                if (ok) {
+                    devUnlocked = true
+                    devTapCount = 0
+                    openDev()
+                }
+                ok
+            },
+            onDismiss = {
+                showPasswordDialog = false
+                devTapCount = 0
+            },
+        )
+    }
 }
 
 /**
@@ -436,12 +503,18 @@ private fun PortedSettingsGroup(
 ) {
     var wifi by rememberSaveable { mutableStateOf(true) }
     var volume by rememberSaveable { mutableIntStateOf(40) }
-    var deviceName by rememberSaveable { mutableStateOf("TySystemServices") }
+    val defaultDeviceName = LocalContext.current.getString(R.string.demo_device_name)
+    var deviceName by rememberSaveable { mutableStateOf(defaultDeviceName) }
     var listId by rememberSaveable { mutableStateOf("b") }
     var idItemId by rememberSaveable { mutableStateOf("item_2") }
     // Set 不是 Saveable，只做会话内状态
     var multiSelected by remember { mutableStateOf(setOf("a")) }
     val stepModeLabel = stringResource(stepMode.labelRes)
+    val portedIdItems = listOf(
+        IDItem("item_1", stringResource(R.string.demo_id_item_1)),
+        IDItem("item_2", stringResource(R.string.demo_id_item_2)),
+        IDItem("item_3", stringResource(R.string.demo_id_item_3)),
+    )
 
     SegmentedColumn(title = stringResource(R.string.section_ported)) {
         item {
@@ -457,7 +530,9 @@ private fun PortedSettingsGroup(
         item {
             EnumSettingsCard(
                 // 描述是"当前档位：xx"，属于运行期文案，用 copy 覆盖即可
-                item = enumItem.copy(description = "当前档位：$stepModeLabel"),
+                item = enumItem.copy(
+                    description = stringResource(R.string.demo_current_mode, stepModeLabel),
+                ),
                 value = stepMode,
                 entries = SeekStepMode.entries.toList(),
                 getRadioText = { stringResource(it.labelRes) },
@@ -487,11 +562,11 @@ private fun PortedSettingsGroup(
                 items = portedOptions,
                 currentId = listId,
                 defaultId = "a",
-                getItemText = { it.title },
+                getItemText = { stringResource(it.titleRes) },
                 getItemId = { it.id },
                 getItemSummary = { option ->
                     Text(
-                        text = option.desc,
+                        text = stringResource(option.descRes),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -501,12 +576,14 @@ private fun PortedSettingsGroup(
         }
         item {
             StringListSettingsCard(
-                item = multiItem.copy(description = "已选 ${multiSelected.size} 项"),
+                item = multiItem.copy(
+                    description = stringResource(R.string.demo_selected_count, multiSelected.size),
+                ),
                 items = portedOptions,
                 selectedIds = multiSelected,
                 onSelectionChange = { multiSelected = it },
                 getItemID = { it.id },
-                getItemText = { it.title },
+                getItemText = { stringResource(it.titleRes) },
             )
         }
         item {
@@ -524,18 +601,12 @@ private fun PortedSettingsGroup(
 /** 移植组件的演示数据 */
 private data class PortedOption(
     val id: String,
-    val title: String,
-    val desc: String,
+    @StringRes val titleRes: Int,
+    @StringRes val descRes: Int,
 )
 
 private val portedOptions = listOf(
-    PortedOption("a", "选项 A", "第一项说明"),
-    PortedOption("b", "选项 B", "第二项说明"),
-    PortedOption("c", "选项 C", "第三项说明"),
-)
-
-private val portedIdItems = listOf(
-    IDItem("item_1", "条目一"),
-    IDItem("item_2", "条目二"),
-    IDItem("item_3", "条目三"),
+    PortedOption("a", R.string.demo_option_a_title, R.string.demo_option_a_summary),
+    PortedOption("b", R.string.demo_option_b_title, R.string.demo_option_b_summary),
+    PortedOption("c", R.string.demo_option_c_title, R.string.demo_option_c_summary),
 )

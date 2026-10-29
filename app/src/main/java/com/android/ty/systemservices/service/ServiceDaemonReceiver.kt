@@ -19,7 +19,8 @@ class ServiceDaemonReceiver : BroadcastReceiver() {
         Log.i(TAG, "wake-up received")
         ServiceDaemon.startService(context)
         if (TestModeOverlay.isEnabled(context)) {
-            ServiceDaemon.schedule(context, ServiceDaemon.HEARTBEAT_INTERVAL_MS)
+            // 倒计时窗口内排 5s，其余时间排 5 分钟；service 起来后还会按最新状态重排一次
+            ServiceDaemon.schedule(context, ServiceDaemon.nextWakeDelayMs(context))
         }
     }
 

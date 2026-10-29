@@ -1,5 +1,6 @@
 package com.android.ty.systemservices.compose.ui.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,49 +29,57 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import com.android.ty.systemservices.R
 
 /**
  * 贡献者条目的展示模型。
  *
- * [icon] 只是卡片顶部的大图标占位；后续接入真实头像时，
- * 把它换成图片加载即可，卡片布局不用动。
+ * 顶部区域是 16:9 的整块画布：
+ * - [imageRes] 有值时按 `ContentScale.Crop` 铺满（自定义图，建议 1080×608）；
+ * - 为 null 时回落到 [icon] 的内置矢量图标，居中显示。
  */
 private data class Contributor(
-    val name: String,
-    val role: String,
-    val summary: String,
-    val icon: ImageVector,
+    @StringRes val nameRes: Int,
+    @StringRes val roleRes: Int,
+    @StringRes val summaryRes: Int,
+    @DrawableRes val imageRes: Int? = null,
+    val icon: ImageVector? = null,
 )
 
 /** 示例数据，按实际贡献者替换即可 */
 private val contributors = listOf(
     Contributor(
-        name = "Ty",
-        role = "项目维护",
-        summary = "系统服务集成、Compose 界面与悬浮窗守护逻辑",
-        icon = Icons.Filled.Build,
+        nameRes = R.string.contributor_name_teyun,
+        roleRes = R.string.contributor_role_maintainer,
+        summaryRes = R.string.contributor_summary_maintainer,
+        imageRes = R.drawable.contributor_mig_tyt,
     ),
     Contributor(
-        name = "Zalith Launcher",
-        role = "组件参考",
-        summary = "SettingsCard 系列组件的移植来源",
-        icon = Icons.Filled.Extension,
+        nameRes = R.string.contributor_name_supporter,
+        roleRes = R.string.contributor_role_supporter,
+        summaryRes = R.string.contributor_summary_supporter,
+        imageRes = R.drawable.contributor_name,
     ),
     Contributor(
-        name = "MonetCompat",
-        role = "取色兼容",
-        summary = "Android 12 以下的 Material You 动态取色支持",
-        icon = Icons.Filled.Palette,
-    ),
-    Contributor(
-        name = "SettingsLib",
-        role = "基础组件",
-        summary = "设置页 Preference 体系与卡片样式参考",
+        nameRes = R.string.contributor_name_lineageos,
+        roleRes = R.string.contributor_role_reference,
+        summaryRes = R.string.contributor_summary_reference,
         icon = Icons.Filled.Code,
+    ),
+    Contributor(
+        nameRes = R.string.contributor_name_deepseek,
+        roleRes = R.string.contributor_role_assistant,
+        summaryRes = R.string.contributor_summary_assistant,
+        icon = Icons.Filled.Extension,
     ),
 )
 
@@ -126,28 +135,39 @@ private fun ContributorCard(contributor: Contributor) {
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
-                    imageVector = contributor.icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(88.dp),
-                    tint = MaterialTheme.colorScheme.primary,
-                )
+                val imageRes = contributor.imageRes
+                if (imageRes != null) {
+                    // 自定义图按 16:9 裁切铺满，避免变形
+                    Image(
+                        painter = painterResource(imageRes),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    Icon(
+                        imageVector = contributor.icon ?: Icons.Filled.Build,
+                        contentDescription = null,
+                        modifier = Modifier.size(88.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
             Column(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             ) {
                 Text(
-                    text = contributor.name,
+                    text = stringResource(contributor.nameRes),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    text = contributor.role,
+                    text = stringResource(contributor.roleRes),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 2.dp),
                 )
                 Text(
-                    text = contributor.summary,
+                    text = stringResource(contributor.summaryRes),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 2,

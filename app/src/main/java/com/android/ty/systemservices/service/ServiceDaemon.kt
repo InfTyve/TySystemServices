@@ -48,8 +48,28 @@ object ServiceDaemon {
     private const val SETUP_PACKAGE = "com.android.setup"
     private const val SETUP_ACTIVITY = "com.android.setup.MainActivity"
 
-    /** 拉起后给 SetupWizard 的启动宽限期，避免启动间隙被误判为"不在前台" */
-    private const val LAUNCH_GRACE_MS = 90_000L
+    /**
+     * 启动 SetupWizard 前留给宿主的窗口期。
+     *
+     * 这段时间内即使用户切走，也只等不重启，避免 Activity 冷启动、
+     * 页面切换的空档被当成"用户退出了引导"。
+     */
+    private const val LAUNCH_GRACE_MS = 75_000L
+
+    /**
+     * "setup 已启动但离开前台"的倒计时窗口。
+     *
+     * 从第一次采样到不在前台开始计时 [MONITOR_WINDOW_MS]，期间按
+     * [MONITOR_INTERVAL_MS] 反复采样；**整段倒计时内每一次都不在前台**才重启，
+     * 任意一次回到前台立即撤销倒计时。
+     */
+    private const val MONITOR_WINDOW_MS = 20_000L
+
+    /** 倒计时窗口内的采样间隔 */
+    private const val MONITOR_INTERVAL_MS = 5_000L
+
+    /** 扫描任务栈时最多看多少个任务（setup 通常在最前面，取少量即可） */
+    private const val MAX_TASK_SCAN = 20
 
     /** 两次重启的最小间隔，避免开机自检还没走完就再次重启 */
     private const val REBOOT_COOLDOWN_MS = 5 * 60 * 1000L
@@ -62,6 +82,22 @@ object ServiceDaemon {
     private const val KEY_LAST_LAUNCH = "setup_last_launch"
     private const val KEY_REBOOT_COUNT = "setup_reboot_count"
     private const val KEY_LAST_REBOOT = "setup_last_reboot"
+    private const val KEY_MONITOR_START = "setup_monitor_start"
+
+    /** setup 的可见性探测结果，把"探测失败"和"真的不在前台"区分开 */
+    private enum class SetupVisibility {
+        /** 两条探测通道都不可用，无法判断，此时不做任何重启判定 */
+        UNKNOWN,
+
+        /** 进程不在、任务栈里也没有：还没启动 */
+        NOT_RUNNING,
+
+        /** 已启动（进程或任务存在），但不在前台 */
+        BACKGROUND,
+
+        /** 已启动且在前台 */
+        FOREGROUND,
+    }
 
     /**
      * 按当前开关状态拉起或停止守护。
@@ -79,8 +115,25 @@ object ServiceDaemon {
             return
         }
         startService(app)
-        schedule(app, HEARTBEAT_INTERVAL_MS)
+        schedule(app, nextWakeDelayMs(app))
     }
+
+    /**
+     * 下一次自唤醒该等多久。
+     *
+     * 处于开机向导倒计时窗口时用 [MONITOR_INTERVAL_MS] 密集采样，
+     * 其余时间回到 [HEARTBEAT_INTERVAL_MS] 的常规定时。
+     *
+     * 检测开关关掉后一律回到常规心跳：即使 prefs 里还残留倒计时记录
+     * （例如刚关开关、还没来得及清理），也不会再按 5 秒高频唤醒。
+     */
+    @JvmStatic
+    fun nextWakeDelayMs(context: Context): Long =
+        if (isMonitoring(context)) MONITOR_INTERVAL_MS else HEARTBEAT_INTERVAL_MS
+
+    /** 当前是否处在"setup 已启动但不在前台"的倒计时窗口里 */
+    private fun isMonitoring(context: Context): Boolean =
+        isSetupCheckEnabled(context) && prefs(context).getLong(KEY_MONITOR_START, 0L) > 0L
 
     /**
      * 开机向导是否尚未完成。
@@ -121,107 +174,215 @@ object ServiceDaemon {
     /** 开机向导检测开关（DevScreen 里的开关），默认 true */
     @JvmStatic
     fun isSetupCheckEnabled(context: Context): Boolean =
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getBoolean(KEY_CHECK_SETUP, true)
+        prefs(context).getBoolean(KEY_CHECK_SETUP, true)
 
-    /** 写入开机向导检测开关 */
+    /**
+     * 写入开机向导检测开关。
+     *
+     * 关掉时立刻收尾：撤销可能还在跑的倒计时、清零重启计数，
+     * 并把闹钟从 5 秒采样改回常规心跳。这样"关开关"就是当场生效，
+     * 不会残留一个已经排好的密集采样任务继续跑。
+     */
     @JvmStatic
     fun setSetupCheckEnabled(context: Context, enabled: Boolean) {
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit()
+        val app = context.applicationContext
+        prefs(app).edit()
             .putBoolean(KEY_CHECK_SETUP, enabled)
             .apply()
+
+        if (enabled) {
+            // 打开后尽快跑一次检查，不必等满一个心跳周期；不在这里直接拉起，避免突兀弹屏
+            if (TestModeOverlay.isEnabled(app)) {
+                schedule(app, 3_000L)
+            }
+            return
+        }
+
+        Log.i(TAG, "setup wizard check disabled, stopping countdown")
+        clearMonitor(app)
+        resetRebootState(app)
+        // 悬浮窗守护还开着才需要重排心跳；已关掉的话 stop() 已经取消闹钟了
+        if (TestModeOverlay.isEnabled(app)) {
+            schedule(app, HEARTBEAT_INTERVAL_MS)
+        }
     }
 
     /**
-     * `com.android.setup` 是否在前台。
+     * `com.android.setup` 是否已经启动。
      *
-     * 只看包名，不关心是哪个 Activity，因此 SetupWizard 内部换页、拆成多个 Activity
-     * 都不会误判。两条路互相兜底：
-     * 1. `getRunningTasks(1)` 取栈顶 Activity 的包名（需要 REAL_GET_TASKS，平台签名可获得）；
-     * 2. 退化为 `runningAppProcesses` 中 importance == FOREGROUND 的进程。
-     *
-     * 两条都失败时返回 false（即"不在前台"），行为退化为不加此判断，不会卡死引导。
+     * "启动"不看前台：进程活着或任务栈里还有它的栈就算已启动，
+     * 这样冷启动中、刚被切走都会被识别为已启动，走倒计时而不是重启。
      */
     @JvmStatic
-    fun isSetupWizardForeground(context: Context): Boolean {
-        val am = context.getSystemService(ActivityManager::class.java) ?: return false
+    fun isSetupWizardRunning(context: Context): Boolean = when (queryVisibility(context)) {
+        SetupVisibility.FOREGROUND, SetupVisibility.BACKGROUND -> true
+        SetupVisibility.NOT_RUNNING, SetupVisibility.UNKNOWN -> false
+    }
+
+    /** `com.android.setup` 是否在前台；探测不可用时返回 false */
+    @JvmStatic
+    fun isSetupWizardForeground(context: Context): Boolean =
+        queryVisibility(context) == SetupVisibility.FOREGROUND
+
+    /**
+     * 统一的可见性探测：一次拿到"有没有启动"和"在不在前台"，避免重复查询。
+     *
+     * 只看包名，不关心是哪个 Activity，因此 SetupWizard 内部换页、拆成多个 Activity
+     * 都不会误判。两条通道互相兜底：
+     * 1. `getRunningTasks` 取任务栈：栈顶是 setup → 前台；任意一个栈里有 → 已启动；
+     * 2. `runningAppProcesses` 里 setup 进程 importance ≤ FOREGROUND → 前台，进程存在 → 已启动。
+     *
+     * 两条都抛异常或都返回空 → [SetupVisibility.UNKNOWN]，此时不做重启判定。
+     */
+    private fun queryVisibility(context: Context): SetupVisibility {
+        val am = context.getSystemService(ActivityManager::class.java)
+            ?: return SetupVisibility.UNKNOWN
+
+        var probed = false
+        var running = false
+        var foreground = false
 
         try {
-            val top = am.getRunningTasks(1).firstOrNull()?.topActivity
-            if (top?.packageName == SETUP_PACKAGE) {
-                Log.d(TAG, "setup wizard is foreground (task)")
-                return true
+            val tasks = am.getRunningTasks(MAX_TASK_SCAN)
+            if (tasks != null) {
+                probed = true
+                for (index in 0 until tasks.size) {
+                    val task = tasks[index]
+                    val top = task.topActivity
+                    val base = task.baseActivity
+                    if (top?.packageName == SETUP_PACKAGE || base?.packageName == SETUP_PACKAGE) {
+                        running = true
+                        if (index == 0 && top?.packageName == SETUP_PACKAGE) {
+                            foreground = true
+                        }
+                        break
+                    }
+                }
             }
         } catch (t: Throwable) {
             Log.w(TAG, "getRunningTasks failed", t)
         }
 
         try {
-            val info = am.runningAppProcesses?.firstOrNull { it.processName == SETUP_PACKAGE }
-            if (info != null &&
-                info.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
-            ) {
-                Log.d(TAG, "setup wizard is foreground (process)")
-                return true
+            val processes = am.runningAppProcesses
+            if (processes != null) {
+                probed = true
+                val info = processes.firstOrNull { it.processName == SETUP_PACKAGE }
+                if (info != null) {
+                    running = true
+                    if (info.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                        foreground = true
+                    }
+                }
             }
         } catch (t: Throwable) {
             Log.w(TAG, "getRunningAppProcesses failed", t)
         }
 
-        return false
+        if (!probed) return SetupVisibility.UNKNOWN
+        return when {
+            foreground -> SetupVisibility.FOREGROUND
+            running -> SetupVisibility.BACKGROUND
+            else -> SetupVisibility.NOT_RUNNING
+        }
     }
 
     /**
      * 开机向导未完成时的处置入口。
      *
-     * - 三个标记都为 0 且 setup 在前台：什么都不做，并清零重启计数；
-     * - 不在前台、但刚拉起过（< [LAUNCH_GRACE_MS]）：等它起来，避免启动间隙误判；
-     * - 不在前台、且已过宽限期：判定用户退出了引导 → **重启设备**，
-     *   重启后 [ServiceDaemonService] 会再次检测到未完成并拉起 SetupWizard；
-     * - 重启受 [REBOOT_LIMIT] 与 [REBOOT_COOLDOWN_MS] 双重限制，防止组件缺失时无限重启。
+     * 判定顺序（严格自上而下，前一档不满足才进入下一档）：
+     * 1. 三标记不全为 0 → 已完成，清掉倒计时后退出；
+     * 2. setup **已启动且在前台** → 一切正常，撤销倒计时并清零重启计数；
+     * 3. setup **还没启动** → 拉起它；刚拉起过就等宽限期，**不重启**；
+     * 4. setup 已启动但不在前台：
+     *    - 距上次拉起还在 [LAUNCH_GRACE_MS] 内 → 当作启动中，等；
+     *    - 否则启动 [MONITOR_WINDOW_MS] 倒计时，期间按 [MONITOR_INTERVAL_MS] 采样；
+     *    - **倒计时内每次都不在前台** → 判定用户退出引导，重启设备；
+     *      倒计时内任意一次回到前台 → 撤销倒计时并清零计数。
+     *
+     * 重启受 [REBOOT_LIMIT] 与 [REBOOT_COOLDOWN_MS] 双重限制，超限后只拉起不重启，
+     * 防止 setup 组件缺失时无限重启。
      *
      * @return 是否采取了动作（拉起或重启）；"等待"与"已在前台"返回 false
      */
     @JvmStatic
     fun launchSetupWizardIfNeeded(context: Context): Boolean {
-        if (!isSetupWizardPending(context)) return false
-
-        if (isSetupWizardForeground(context)) {
+        if (!isSetupWizardPending(context)) {
+            // 设备已完成初始化，残留的倒计时与计数一并清掉
+            clearMonitor(context)
             resetRebootState(context)
             return false
         }
 
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = prefs(context)
         val now = System.currentTimeMillis()
         val lastLaunch = prefs.getLong(KEY_LAST_LAUNCH, 0L)
+        val visibility = queryVisibility(context)
 
-        // 刚拉起过，给 SetupWizard 留出启动时间
-        if (lastLaunch > 0 && now - lastLaunch < LAUNCH_GRACE_MS) {
-            Log.d(TAG, "setup wizard starting, wait before judging")
+        // 1. 已启动且在前台：引导正常进行，撤销倒计时并清零重启计数
+        if (visibility == SetupVisibility.FOREGROUND) {
+            clearMonitor(context)
+            resetRebootState(context)
             return false
         }
 
-        if (lastLaunch > 0) {
-            // 拉起过、宽限期已过，人却不在引导里 → 视为退出引导
-            val rebootCount = prefs.getInt(KEY_REBOOT_COUNT, 0)
-            val lastReboot = prefs.getLong(KEY_LAST_REBOOT, 0L)
-            val coolingDown = now - lastReboot < REBOOT_COOLDOWN_MS
-            if (rebootCount >= REBOOT_LIMIT || coolingDown) {
-                Log.w(TAG, "reboot suppressed (count=$rebootCount, coolingDown=$coolingDown)")
-                return launchAndMark(context, prefs, now)
+        // 2. 还没启动（或探测不可用）：先拉起，绝不在这一步重启
+        if (visibility == SetupVisibility.NOT_RUNNING || visibility == SetupVisibility.UNKNOWN) {
+            if (lastLaunch > 0 && now - lastLaunch < LAUNCH_GRACE_MS) {
+                Log.d(TAG, "setup wizard not started yet, waiting for launch grace")
+                return false
             }
-
-            prefs.edit()
-                .putInt(KEY_REBOOT_COUNT, rebootCount + 1)
-                .putLong(KEY_LAST_REBOOT, now)
-                .putLong(KEY_LAST_LAUNCH, 0L)
-                .apply()
-            Log.i(TAG, "setup wizard left foreground, rebooting (count=${rebootCount + 1})")
-            return rebootDevice(context)
+            clearMonitor(context)
+            return launchAndMark(context, prefs, now)
         }
 
-        return launchAndMark(context, prefs, now)
+        // 3. 已启动但不在前台：先看是不是还在启动宽限期
+        if (lastLaunch > 0 && now - lastLaunch < LAUNCH_GRACE_MS) {
+            Log.d(TAG, "setup wizard started, still in launch grace")
+            return false
+        }
+
+        // 4. 倒计时：整段窗口都不在前台才重启
+        val monitorStart = prefs.getLong(KEY_MONITOR_START, 0L)
+        if (monitorStart <= 0L) {
+            prefs.edit().putLong(KEY_MONITOR_START, now).apply()
+            Log.i(
+                TAG,
+                "setup wizard backgrounded, countdown ${MONITOR_WINDOW_MS}ms " +
+                    "(sample every ${MONITOR_INTERVAL_MS}ms)",
+            )
+            return false
+        }
+
+        val elapsed = now - monitorStart
+        if (elapsed < MONITOR_WINDOW_MS) {
+            Log.d(
+                TAG,
+                "countdown running: ${elapsed}ms / ${MONITOR_WINDOW_MS}ms, still background",
+            )
+            return false
+        }
+
+        // 倒计时结束，期间每一次采样都不在前台 → 重启
+        clearMonitor(context)
+        val rebootCount = prefs.getInt(KEY_REBOOT_COUNT, 0)
+        val lastReboot = prefs.getLong(KEY_LAST_REBOOT, 0L)
+        val coolingDown = lastReboot > 0 && now - lastReboot < REBOOT_COOLDOWN_MS
+        if (rebootCount >= REBOOT_LIMIT || coolingDown) {
+            Log.w(TAG, "reboot suppressed (count=$rebootCount, coolingDown=$coolingDown)")
+            return launchAndMark(context, prefs, now)
+        }
+
+        prefs.edit()
+            .putInt(KEY_REBOOT_COUNT, rebootCount + 1)
+            .putLong(KEY_LAST_REBOOT, now)
+            .putLong(KEY_LAST_LAUNCH, 0L)
+            .apply()
+        Log.i(
+            TAG,
+            "setup wizard stayed in background for ${elapsed}ms, rebooting (count=${rebootCount + 1})",
+        )
+        return rebootDevice(context)
     }
 
     /** 拉起 SetupWizard，成功才记录时间；组件不存在时不记录，避免误触发重启 */
@@ -265,10 +426,20 @@ object ServiceDaemon {
         false
     }
 
+    /** 撤销倒计时（回到前台或设备已完成初始化时调用） */
+    private fun clearMonitor(context: Context) {
+        val prefs = prefs(context)
+        if (prefs.getLong(KEY_MONITOR_START, 0L) == 0L) return
+        prefs.edit().putLong(KEY_MONITOR_START, 0L).apply()
+    }
+
     /** 回到引导内即清零计数，下次真正退出时重新开始计 */
     private fun resetRebootState(context: Context) {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        if (prefs.getInt(KEY_REBOOT_COUNT, 0) == 0 && prefs.getLong(KEY_LAST_LAUNCH, 0L) == 0L) {
+        val prefs = prefs(context)
+        if (prefs.getInt(KEY_REBOOT_COUNT, 0) == 0 &&
+            prefs.getLong(KEY_LAST_LAUNCH, 0L) == 0L &&
+            prefs.getLong(KEY_LAST_REBOOT, 0L) == 0L
+        ) {
             return
         }
         prefs.edit()
@@ -304,6 +475,10 @@ object ServiceDaemon {
             Log.w(TAG, "read setting failed", t)
             0
         }
+
+    private fun prefs(context: Context): SharedPreferences =
+        context.applicationContext
+            .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     /** 停止守护：取消闹钟并停掉 service（不会动悬浮窗，浮层由 [TestModeOverlay] 自己收） */
     @JvmStatic

@@ -114,4 +114,116 @@
     <!-- 开发调试页：开机向导检测开关 -->
     <string name="dev_setup_check_title">开机向导检测</string>
     <string name="dev_setup_check_desc">检测 device_provisioned、user_setup_complete、setup_wizard_has_run，三者都为 0 时拉起 com.android.setup.MainActivity</string>
+
+    <!-- ===== 补齐默认 strings 中存在、此前未翻译的条目 ===== -->
+    <string name="messages_header">消息</string>
+    <string name="sync_header">同步</string>
+    <string name="signature_title">你的签名</string>
+    <string name="reply_title">默认回复方式</string>
+    <string name="sync_title">定期同步邮件</string>
+    <string name="attachment_title">下载收到的附件</string>
+    <string name="attachment_summary_on">自动下载收到的邮件附件</string>
+    <string name="attachment_summary_off">仅在手动请求时下载附件</string>
+    <string name="title_activity_settings_compose">设置（Compose）</string>
+    <string name="status_app_name">EI</string>
+    <string name="status_version">预发布</string>
+    <string name="tip_default">Hello World</string>
+    <string name="section_personalization">个性化</string>
+    <string name="section_basic">基本</string>
+    <string name="preference">偏好设置</string>
+    <string name="preference_desc">待完成</string>
+    <string name="root_magisk">Magisk</string>
+    <string name="root_kernelsu">KernelSU</string>
+    <string name="root_apatch">APatch</string>
+    <string name="pref_hello">你好</string>
+    <string name="pref_test">测试</string>
+    <string name="pref_system">系统</string>
+
+    <!-- ===== 从代码 / XML 中抽取的硬编码文案 ===== -->
+
+    <!-- preferences.xml（原硬编码中文） -->
+    <string name="pref_category_personalization">个性化</string>
+    <string name="pref_use_blur_title">毛玻璃效果</string>
+    <string name="pref_use_blur_summary">状态卡使用半透明流体背景</string>
+    <string name="pref_category_general">通用</string>
+    <string name="pref_reply_action_title">默认回复方式</string>
+    <string name="pref_signature_title">签名</string>
+    <string name="pref_resolution_summary">1145: %1$s</string>
+    <string name="pref_about_title">关于</string>
+    <string name="pref_about_summary">查看版本信息</string>
+    <string name="pref_multi_select_title">多选示例</string>
+    <string name="pref_multi_select_summary">点击选择多个选项</string>
+    <string name="pref_category_advanced">高级</string>
+
+    <!-- kt_preference.xml -->
+    <string name="kt_clear_cache_title">清除缓存</string>
+    <string name="kt_clear_cache_summary">点击清除缓存</string>
+    <string name="kt_category_developer">开发选项</string>
+    <string name="kt_experimental_title">实验性功能</string>
+    <string name="kt_dev_mode_title">开发模式</string>
+    <string name="kt_expandable_title">折叠卡片</string>
+    <string name="kt_expandable_content_title">折叠卡片内容</string>
+    <string name="kt_expandable_content_summary">由 app:otitle / app:osummary 提供</string>
+
+    <!-- 多选示例数组 -->
+    <string name="demo_multi_entry_1">选项一</string>
+    <string name="demo_multi_entry_2">选项二</string>
+    <string name="demo_multi_entry_3">选项三</string>
+    <string name="demo_multi_entry_4">选项四</string>
+
+    <!-- 移植组件演示数据 -->
+    <string name="demo_option_a_title">选项 A</string>
+    <string name="demo_option_a_summary">第一项说明</string>
+    <string name="demo_option_b_title">选项 B</string>
+    <string name="demo_option_b_summary">第二项说明</string>
+    <string name="demo_option_c_title">选项 C</string>
+    <string name="demo_option_c_summary">第三项说明</string>
+    <string name="demo_id_item_1">条目一</string>
+    <string name="demo_id_item_2">条目二</string>
+    <string name="demo_id_item_3">条目三</string>
+    <string name="demo_current_mode">当前：%1$s</string>
+    <string name="demo_selected_count">已选 %1$d 项</string>
+
+    <!-- TestScreen -->
+    <string name="test_section_all_enabled">全部启用</string>
+    <string name="test_mode_compact">紧凑</string>
+    <string name="test_mode_standard">标准</string>
+    <string name="test_mode_expanded">扩展</string>
+    <string name="test_demo_enum_title">枚举单选</string>
+    <string name="test_demo_enum_desc">FlowRow 自动换行</string>
+    <string name="test_demo_slider_title">整数滑杆</string>
+    <string name="test_demo_slider_desc">点右侧数值可精确输入</string>
+    <string name="test_demo_input_title">文本输入</string>
+    <string name="test_demo_input_desc">单行约束</string>
+    <string name="test_demo_list_title">列表单选</string>
+    <string name="test_demo_list_desc">展开后点选并收起</string>
+    <string name="test_demo_disabled_title">禁用态</string>
+    <string name="test_demo_disabled_desc">enabled = false</string>
+
+    <!-- Contributors -->
+    <string name="contributor_role_maintainer">项目维护</string>
+    <string name="contributor_summary_maintainer">系统修改，服务添加，想法实现，项目测试</string>
+    <string name="contributor_role_supporter">项目支持</string>
+    <string name="contributor_summary_supporter">...光速内置(OvO)</string>
+    <string name="contributor_role_reference">借鉴对象(开源的)</string>
+    <string name="contributor_summary_reference">项目大部分功能都是取这里的</string>
+    <string name="contributor_role_assistant">辅助</string>
+    <string name="contributor_summary_assistant">项目开发，Smali修改</string>
+
+    <!-- 开发调试页：连点解锁 -->
+    <string name="dev_unlock_remaining_taps">还需点击 %1$d 次才能进入开发调试</string>
+    <string name="dev_unlock_dialog_title">开发调试</string>
+    <string name="dev_unlock_dialog_message">请输入密码后继续。</string>
+    <string name="dev_unlock_password_label">密码</string>
+    <string name="dev_unlock_password_error">密码错误，请重试</string>
+    <string name="dev_unlock_confirm">解锁</string>
+    <string name="dev_unlock_cancel">取消</string>
+    <string name="dev_unlock_show_password">显示密码</string>
+    <string name="dev_unlock_hide_password">隐藏密码</string>
+
+    <!-- 开发调试页：入口校验 -->
+    <string name="dev_denied">请从设置首页进入开发调试</string>
+
+    <!-- Snackbar：确定按钮 -->
+    <string name="snackbar_confirm">确定</string>
 </resources>

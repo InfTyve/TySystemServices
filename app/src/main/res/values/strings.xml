@@ -41,8 +41,8 @@
     <string name="tip_lab">Experimental</string>
 
     <!-- 分组标题 -->
-    <string name="section_personalization"></string>
-    <string name="section_basic">T1</string>
+    <string name="section_personalization">Personalization</string>
+    <string name="section_basic">Basic</string>
     <string name="section_animation">Animation demos</string>
     <string name="section_module">Modules</string>
 
@@ -165,4 +165,102 @@
     <!-- Developer page: setup wizard check -->
     <string name="dev_setup_check_title">Setup wizard check</string>
     <string name="dev_setup_check_desc">Checks device_provisioned, user_setup_complete and setup_wizard_has_run; launches com.android.setup.MainActivity when all are 0</string>
+
+    <!-- ===== 以下为从代码 / XML 中抽取的硬编码文案 ===== -->
+
+    <!-- preferences.xml（原硬编码中文） -->
+    <string name="pref_category_personalization">Personalization</string>
+    <string name="pref_use_blur_title">Frosted glass effect</string>
+    <string name="pref_use_blur_summary">Status card uses a translucent fluid background</string>
+    <string name="pref_category_general">General</string>
+    <string name="pref_reply_action_title">Default reply action</string>
+    <string name="pref_signature_title">Signature</string>
+    <string name="pref_resolution_title" translatable="false">11</string>
+    <string name="pref_resolution_summary">1145: %1$s</string>
+    <string name="pref_about_title">About</string>
+    <string name="pref_about_summary">View version information</string>
+    <string name="pref_multi_select_title">Multi-select sample</string>
+    <string name="pref_multi_select_summary">Tap to select multiple options</string>
+    <string name="pref_category_advanced">Advanced</string>
+
+    <!-- kt_preference.xml -->
+    <string name="kt_clear_cache_title">Clear cache</string>
+    <string name="kt_clear_cache_summary">Tap to clear cached data</string>
+    <string name="kt_category_developer">Developer options</string>
+    <string name="kt_experimental_title">Experimental features</string>
+    <string name="kt_dev_mode_title">Developer mode</string>
+    <string name="kt_expandable_title">Expandable card</string>
+    <string name="kt_expandable_content_title">Expanded card content</string>
+    <string name="kt_expandable_content_summary">Provided by app:otitle / app:osummary</string>
+
+    <!-- root.xml -->
+    <string name="root_pref_title" translatable="false">001</string>
+
+    <!-- 多选示例数组 -->
+    <string name="demo_multi_entry_1">Option one</string>
+    <string name="demo_multi_entry_2">Option two</string>
+    <string name="demo_multi_entry_3">Option three</string>
+    <string name="demo_multi_entry_4">Option four</string>
+
+    <!-- 移植组件演示数据 -->
+    <string name="demo_device_name" translatable="false">TySystemServices</string>
+    <string name="demo_option_a_title">Option A</string>
+    <string name="demo_option_a_summary">First item description</string>
+    <string name="demo_option_b_title">Option B</string>
+    <string name="demo_option_b_summary">Second item description</string>
+    <string name="demo_option_c_title">Option C</string>
+    <string name="demo_option_c_summary">Third item description</string>
+    <string name="demo_id_item_1">Item one</string>
+    <string name="demo_id_item_2">Item two</string>
+    <string name="demo_id_item_3">Item three</string>
+    <string name="demo_current_mode">Current: %1$s</string>
+    <string name="demo_selected_count">%1$d selected</string>
+
+    <!-- TestScreen -->
+    <string name="test_screen_title" translatable="false">TestScreen</string>
+    <string name="test_section_all_enabled">All enabled</string>
+    <string name="test_mode_compact">Compact</string>
+    <string name="test_mode_standard">Standard</string>
+    <string name="test_mode_expanded">Expanded</string>
+    <string name="test_demo_enum_title">Enum radio</string>
+    <string name="test_demo_enum_desc">FlowRow with automatic wrapping</string>
+    <string name="test_demo_slider_title">Integer slider</string>
+    <string name="test_demo_slider_desc">Tap the value on the right to type an exact number</string>
+    <string name="test_demo_input_title">Text input</string>
+    <string name="test_demo_input_desc">Single-line constraint</string>
+    <string name="test_demo_list_title">Single choice list</string>
+    <string name="test_demo_list_desc">Expand, pick one, then collapse</string>
+    <string name="test_demo_disabled_title">Disabled state</string>
+    <string name="test_demo_disabled_desc">enabled = false</string>
+
+    <!-- Contributors -->
+    <string name="contributor_name_teyun" translatable="false">TeYun_Mig_Tyt</string>
+    <string name="contributor_name_supporter" translatable="false">Name</string>
+    <string name="contributor_name_lineageos" translatable="false">LineageOS</string>
+    <string name="contributor_name_deepseek" translatable="false">DeepSeek</string>
+    <string name="contributor_role_maintainer">Project maintainer</string>
+    <string name="contributor_summary_maintainer">System modifications, service integration, idea implementation and project testing</string>
+    <string name="contributor_role_supporter">Project support</string>
+    <string name="contributor_summary_supporter">...built in at light speed (OvO)</string>
+    <string name="contributor_role_reference">Reference project (open source)</string>
+    <string name="contributor_summary_reference">Most of the features come from here</string>
+    <string name="contributor_role_assistant">Assistant</string>
+    <string name="contributor_summary_assistant">Project development, Smali modifications</string>
+
+    <!-- Developer page: tap-to-unlock gate -->
+    <string name="dev_unlock_remaining_taps">%1$d more taps to unlock Developer</string>
+    <string name="dev_unlock_dialog_title">Developer access</string>
+    <string name="dev_unlock_dialog_message">Enter the password to continue.</string>
+    <string name="dev_unlock_password_label">Password</string>
+    <string name="dev_unlock_password_error">Wrong password, try again</string>
+    <string name="dev_unlock_confirm">Unlock</string>
+    <string name="dev_unlock_cancel">Cancel</string>
+    <string name="dev_unlock_show_password">Show password</string>
+    <string name="dev_unlock_hide_password">Hide password</string>
+
+    <!-- Developer page: entry guard -->
+    <string name="dev_denied">Open Developer from the settings home screen</string>
+
+    <!-- Snackbar: confirm button -->
+    <string name="snackbar_confirm">OK</string>
 </resources>
