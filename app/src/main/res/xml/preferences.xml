@@ -2,6 +2,16 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!--
+        顶部品牌 Logo：不做成可点击项，只借 Preference 的自定义布局能力占一行。
+        layout = hua_logoi（背景 harmonyos_logo_bg + 居中 emui_brand_logo + 圆角）
+    -->
+    <androidx.preference.Preference
+        android:key="hua_logo_header"
+        android:layout="@layout/hua_logoi"
+        android:persistent="false"
+        android:selectable="false" />
+
     <androidx.preference.PreferenceCategory
         android:key="category_personalization"
         android:title="@string/pref_category_personalization">

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Logo 卡片的圆角轮廓。
+    只提供 outline（圆角 + 底色），真实背景图由 hua_logoi 里的 ImageView 铺满，
+    配合 android:clipToOutline="true" 把图片裁成圆角。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="24dp" />
+    <solid android:color="@android:color/white" />
+</shape>
