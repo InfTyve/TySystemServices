@@ -118,7 +118,7 @@ fun rememberAppSnackbarState(): AppSnackbarState = remember { AppSnackbarState()
 /**
  * 通用 Snackbar 宿主。
  *
- * 视觉：深色圆角卡片 + 白色文字 + 右下角「确定」按钮。
+ * 视觉：深色近直角卡片（2dp 圆角）+ 白色文字 + 右下角「确定」按钮。
  * 行为：
  *  - 首次出现从屏幕右侧滑入；
  *  - 文案变化（连点更新计数）只换文字，不重播动画；
@@ -132,10 +132,10 @@ fun rememberAppSnackbarState(): AppSnackbarState = remember { AppSnackbarState()
 fun AppSnackbarHost(
     state: AppSnackbarState,
     confirmText: String? = null,
-    shape: Shape = RoundedCornerShape(20.dp),
+    shape: Shape = RoundedCornerShape(2.dp),
     containerColor: Color = SnackbarContainer,
     contentColor: Color = Color.White,
-    bottomMargin: Dp = 24.dp,
+    bottomMargin: Dp = 8.dp,
 ) {
     val data = state.current
     val density = LocalDensity.current
