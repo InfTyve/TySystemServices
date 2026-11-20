@@ -261,4 +261,32 @@
     <string name="contributors_cloud_commits">%1$s 次提交</string>
     <string name="contributors_cloud_stats_title">关于这张云图</string>
     <string name="contributors_cloud_stats_message">贡献者：%1$s\n提交数：%2$s\n数据更新：%3$s</string>
+
+    <!-- 终端 -->
+    <string name="termux_app_name">终端</string>
+    <string name="termux_session_name">会话 %1$d</string>
+    <string name="termux_menu_new_session">新建会话</string>
+    <string name="termux_menu_close_session">关闭会话</string>
+    <string name="termux_menu_settings">设置</string>
+    <string name="termux_settings_title">终端设置</string>
+    <string name="termux_pref_volume_key">音量键功能</string>
+    <string name="termux_pref_volume_key_summary">使用音量键滚动终端</string>
+    <string name="termux_pref_fullscreen">全屏模式</string>
+    <string name="termux_pref_fullscreen_summary">使用终端时隐藏状态栏</string>
+    <string name="termux_pref_orientation">屏幕方向</string>
+    <string name="termux_pref_font_size">字号</string>
+    <string name="termux_pref_colors">配色</string>
+    <string name="termux_orientation_automatic">自动</string>
+    <string name="termux_orientation_portrait">竖屏</string>
+    <string name="termux_orientation_landscape">横屏</string>
+    <string name="termux_color_white_on_black">黑底白字</string>
+    <string name="termux_color_black_on_white">白底黑字</string>
+    <string name="termux_color_green_on_black">黑底绿字</string>
+    <string name="termux_session_ended">会话已结束</string>
+    <string name="termux_press_back_again">再按一次退出</string>
+    <string name="termux_pref_category_ui">界面</string>
+    <string name="termux_pref_category_display">显示</string>
+    <string name="copy_text">复制</string>
+    <string name="paste_text">粘贴</string>
+    <string name="text_selection_more">更多…</string>
 </resources>

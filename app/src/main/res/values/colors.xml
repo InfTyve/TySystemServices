@@ -16,4 +16,5 @@
     <color name="group_card_divider">#E5E5EA</color>
     <color name="group_card_bg">#FFFFFF</color>
     <color name="texttitle">#FF000000</color>
+    <color name="termux_icon_background">#FF141414</color>
 </resources>

@@ -88,6 +88,34 @@
             android:theme="@style/Open.MigPreference"
             android:label="@string/security_title" />
 
+        <!-- 终端：桌面独立入口（LAUNCHER），图标与主设置页分开 -->
+        <activity
+            android:name=".terminal.TermuxActivity"
+            android:exported="true"
+            android:icon="@mipmap/ic_termux_launcher"
+            android:roundIcon="@mipmap/ic_termux_launcher"
+            android:label="@string/termux_app_name"
+            android:theme="@style/Theme.SystemServices.Termux"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".terminal.TermuxSettingsActivity"
+            android:exported="false"
+            android:label="@string/termux_settings_title"
+            android:theme="@style/Theme.SystemServices.Termux" />
+
+        <service
+            android:name=".terminal.TermuxService"
+            android:exported="false" />
+
         <activity-alias
             android:name=".TopLevelSettingsActivity"
             android:enabled="true"

@@ -34,4 +34,13 @@
         <item name="android:textStyle">bold</item>
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
+
+    <!-- 终端：纯黑背景，和 AOSP Terminal 的观感一致 -->
+    <style name="Theme.SystemServices.Termux" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">#FF000000</item>
+        <item name="android:navigationBarColor">#FF000000</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+    </style>
 </resources>

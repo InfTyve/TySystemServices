@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/termux_settings_title">
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="volumekey_mode"
+        android:summary="@string/termux_pref_volume_key_summary"
+        android:title="@string/termux_pref_volume_key" />
+
+    <PreferenceCategory android:title="@string/termux_pref_category_ui">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="fullscreen_mode"
+            android:summary="@string/termux_pref_fullscreen_summary"
+            android:title="@string/termux_pref_fullscreen" />
+        <ListPreference
+            android:defaultValue="automatic"
+            android:dialogTitle="@string/termux_pref_orientation"
+            android:entries="@array/termux_orientation_entries"
+            android:entryValues="@array/termux_orientation_values"
+            android:key="screen_orientation"
+            android:summary="%s"
+            android:title="@string/termux_pref_orientation" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/termux_pref_category_display">
+        <ListPreference
+            android:defaultValue="14"
+            android:dialogTitle="@string/termux_pref_font_size"
+            android:entries="@array/termux_font_size_entries"
+            android:entryValues="@array/termux_font_size_values"
+            android:key="font_size"
+            android:summary="%s"
+            android:title="@string/termux_pref_font_size" />
+        <ListPreference
+            android:defaultValue="#FFFFFF/#000000"
+            android:dialogTitle="@string/termux_pref_colors"
+            android:entries="@array/termux_color_entries"
+            android:entryValues="@array/termux_color_values"
+            android:key="text_colors"
+            android:summary="%s"
+            android:title="@string/termux_pref_colors" />
+    </PreferenceCategory>
+</PreferenceScreen>
