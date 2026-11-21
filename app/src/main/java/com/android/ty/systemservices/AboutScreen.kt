@@ -61,8 +61,8 @@ fun AboutScreen() {
                 item {
                     NavigationItemWidget(
                         icon = Icons.Filled.Construction,
-                        title = stringResource(R.string.lab),
-                        description = stringResource(R.string.lab_desc),
+                        title = stringResource(R.string.contributors_title),
+                        description = stringResource(R.string.contributor_role_maintainer),
                         onClick = {
                             val intent = Intent(context, ContributorsActivity::class.java)
                             context.startActivity(intent)
