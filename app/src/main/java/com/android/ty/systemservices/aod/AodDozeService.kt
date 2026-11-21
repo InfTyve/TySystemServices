@@ -37,30 +37,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/**
- * 熄屏显示（AOD）的 doze 组件。
- *
- * 系统把 framework-res 的 `config_dozeComponent` 指向本服务后，
- * 每次灭屏进入 doze 都会以 doze 模式绑定这里，由它负责在低功耗面板上作画，
- * 取代默认的 `com.android.systemui/.doze.DozeService`。
- *
- * 为什么直接继承 [DreamService] 而不是某个 `DozeService`：
- * AOSP 框架里**没有** `android.service.dreams.DozeService` 这个类，
- * `config_dozeComponent` 指向的组件（含 SystemUI 自己的实现）都是
- * `android.service.dreams.DreamService` 的子类；doze 相关能力
- * （`startDozing` / `setDozeScreenState` / `setDozeScreenBrightness`）是
- * DreamService 上的 @hide 方法，用反射调用，避免编译期依赖隐藏 API。
- * 之前继承了一个不存在的类，运行时类加载直接失败，表现就是熄屏后全黑。
- *
- * 关键约束：
- * - manifest 里必须声明 `BIND_DREAM_SERVICE`（signature 级）与 DreamService 的 intent-filter；
- * - 只有在 DreamManagerService 以 doze 模式绑定时 `startDozing()` 才会生效，
- *   否则 `setDozeScreenState()` 不产生任何效果（此时窗口本身仍然可见）；
- * - UI 用原生 View 而不是 Compose：doze 窗口不是 Activity，没有
- *   `ViewTreeLifecycleOwner`，Compose 需要手工挂 owner，一旦出问题就是灭屏后全黑。
- *
- * 交互：轻触屏幕 -> 唤醒到锁屏。
- */
+
 class AodDozeService : DreamService() {
 
     private val handler = Handler(Looper.getMainLooper())
