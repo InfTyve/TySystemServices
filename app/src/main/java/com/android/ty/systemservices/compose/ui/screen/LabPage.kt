@@ -1,6 +1,5 @@
 package com.android.ty.systemservices.compose.ui.screen
 
-import android.app.Activity
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,9 +10,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +26,6 @@ import com.android.ty.systemservices.compose.ui.widget.InfoTipCard
 import com.android.ty.systemservices.compose.ui.widget.SegmentedColumn
 import com.android.ty.systemservices.compose.ui.widget.SwitchWidget
 import com.android.ty.systemservices.compose.ui.widget.setting.DropDownMenuWidget
-import com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveBackButton
 
 /** Root 实现（管理器）选项 */
 enum class RootImplementation(@StringRes val labelRes: Int) {

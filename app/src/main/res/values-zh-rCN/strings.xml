@@ -166,6 +166,7 @@
     <string name="pref_signature_title">签名</string>
     <string name="pref_resolution_summary">1145: %1$s</string>
     <string name="pref_about_title">关于</string>
+    <string name="about">关于TeYun</string>
     <string name="pref_about_summary">查看版本信息</string>
     <string name="pref_multi_select_title">多选示例</string>
     <string name="pref_multi_select_summary">点击选择多个选项</string>

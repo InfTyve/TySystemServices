@@ -54,6 +54,7 @@ private val DarkColors = darkColorScheme(
 @Composable
 fun TyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+
     content: @Composable () -> Unit,
 ) {
     MaterialTheme(

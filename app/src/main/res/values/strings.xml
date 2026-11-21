@@ -148,6 +148,10 @@
     <string name="seek_mode_fine">Fine</string>
     <string name="seek_mode_title">Slider steps</string>
 
+    <string name="teyun_studio" translatable="false">TeYun Studio \n Mig_Tyt</string>
+    <string name="about">About TeYun</string>
+    <string name="space" translatable="false">ㅤ</string>
+
     <!-- Ported settings cards -->
     <string name="section_ported">Ported components</string>
     <string name="ported_switch_title">Switch</string>
@@ -329,4 +333,5 @@
     <string name="copy_text">Copy</string>
     <string name="paste_text">Paste</string>
     <string name="text_selection_more">More…</string>
+    <string name="title_activity_about2">AboutActivity2</string>
 </resources>
