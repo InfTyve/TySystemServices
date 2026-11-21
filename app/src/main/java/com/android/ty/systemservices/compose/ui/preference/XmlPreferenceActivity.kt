@@ -2,6 +2,7 @@ package com.android.ty.systemservices.compose.ui.preference
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import com.android.ty.systemservices.AboutActivity
 import com.android.ty.systemservices.BackButtonHelper
@@ -11,6 +12,7 @@ import com.android.ty.systemservices.SecurityActivity
 import com.android.ty.systemservices.TitleStyle
 import com.android.ty.systemservices.compose.ContributorsActivity
 import com.android.ty.systemservices.terminal.TermuxActivity
+import com.android.ty.systemservices.terminal.TermuxLauncher
 
 /**
  * 从 XML 加载 Preference 层级的设置页宿主。
@@ -41,6 +43,13 @@ class XmlPreferenceActivity : CollapsingToolbarBaseActivity(TitleStyle.PREFERENC
                 .replace(R.id.content_frame, SettingsFragment())
                 .commit()
         }
+    }
+
+    override fun onCreateMenu(menu: Menu) {
+        super.onCreateMenu(menu)
+        // 桌面入口关掉后 TermuxActivity 组件被禁用，这里同步隐藏 Terminal 项，
+        // 否则点进去会抛 ActivityNotFoundException
+        menu.findItem(R.id.action_terminal)?.isVisible = TermuxLauncher.isEnabled(this)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

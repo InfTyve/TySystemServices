@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import android.content.Intent
 import android.os.Build
+import android.widget.Toast
 import com.android.ty.systemservices.compose.ui.preference.XmlPreferenceActivity
 import com.android.ty.systemservices.compose.ui.widget.setting.BigTitleImpl
 import com.android.ty.systemservices.compose.ui.widget.setting.DropDownMenuWidget
@@ -54,6 +55,7 @@ import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.RadioButtonChecked
+import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.filled.Wifi
@@ -119,6 +121,7 @@ import com.android.ty.systemservices.compose.ui.widget.AppSnackbarHost
 import com.android.ty.systemservices.compose.ui.widget.PasswordPromptDialog
 import com.android.ty.systemservices.compose.ui.widget.rememberAppSnackbarState
 import com.android.ty.systemservices.service.OverlayPreferenceSettings
+import com.android.ty.systemservices.terminal.TermuxLauncher
 
 import kotlin.math.roundToInt
 
@@ -140,6 +143,8 @@ fun PreferencesScreen() {
     var advancedExpanded2 by remember { mutableStateOf(false) }
     var bigTitleImpl by remember { mutableStateOf(loadBigTitleImpl(context)) }
     var mainTitleImpl by remember { mutableStateOf(loadMainTitleImpl(context)) }
+    // 桌面入口的实际状态直接问 PackageManager，避免 UI 与组件状态不一致
+    var termuxLauncherEnabled by remember { mutableStateOf(TermuxLauncher.isEnabled(context)) }
 
     // 开发调试入口：连点 10 次解锁，本次会话内解锁后不再重复验证
     var devTapCount by rememberSaveable { mutableIntStateOf(0) }
@@ -280,6 +285,27 @@ fun PreferencesScreen() {
                             checked = OverlayPreferenceSettings.useDropdown,
                             onCheckedChange = { newValue ->
                                 OverlayPreferenceSettings.setDropdownEnabled(context, newValue)
+                            },
+                        )
+                    }
+                    item {
+                        // 只切换 TermuxActivity 组件的 enabled，桌面图标随 PACKAGE_CHANGED 自动刷新
+                        SwitchWidget(
+                            icon = Icons.Filled.Terminal,
+                            title = stringResource(R.string.termux_launcher_title),
+                            description = stringResource(R.string.termux_launcher_desc),
+                            checked = termuxLauncherEnabled,
+                            onCheckedChange = { newValue ->
+                                termuxLauncherEnabled = newValue
+                                TermuxLauncher.setEnabled(context, newValue)
+                                // 关掉后应用会从桌面消失，给个明确反馈，免得以为装坏了
+                                if (!newValue) {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.termux_launcher_hidden,
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                }
                             },
                         )
                     }

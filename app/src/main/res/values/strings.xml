@@ -301,6 +301,9 @@
 
     <!-- 终端 -->
     <string name="termux_app_name">Terminal</string>
+    <string name="termux_launcher_title">Terminal on home screen</string>
+    <string name="termux_launcher_desc">Show the Terminal icon in the launcher; turn off to hide it</string>
+    <string name="termux_launcher_hidden">Hidden from home screen</string>
     <string name="termux_session_name">Session %1$d</string>
     <string name="termux_menu_new_session">New session</string>
     <string name="termux_menu_close_session">Close session</string>
