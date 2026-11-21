@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="termux_font_size_entries">
+        <item>8</item>
+        <item>10</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>24</item>
+        <item>28</item>
+        <item>32</item>
+    </string-array>
+    <string-array name="termux_font_size_values">
+        <item>8</item>
+        <item>10</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>24</item>
+        <item>28</item>
+        <item>32</item>
+    </string-array>
+
+    <string-array name="termux_orientation_entries">
+        <item>@string/termux_orientation_automatic</item>
+        <item>@string/termux_orientation_portrait</item>
+        <item>@string/termux_orientation_landscape</item>
+    </string-array>
+    <string-array name="termux_orientation_values">
+        <item>automatic</item>
+        <item>portrait</item>
+        <item>landscape</item>
+    </string-array>
+
+    <string-array name="termux_color_entries">
+        <item>@string/termux_color_white_on_black</item>
+        <item>@string/termux_color_black_on_white</item>
+        <item>@string/termux_color_green_on_black</item>
+    </string-array>
+    <string-array name="termux_color_values">
+        <item>#FFFFFF/#000000</item>
+        <item>#000000/#FFFFFF</item>
+        <item>#33FF33/#000000</item>
+    </string-array>
+</resources>

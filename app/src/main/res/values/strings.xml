@@ -1,0 +1,332 @@
+<resources>
+    <string name="app_name">TySystemServices</string>
+    <string name="app_title">SystemServiceSettings</string>
+    <string name="summary">OpenServiveSettings</string>
+    <string name="theme_customization_device_default">Device Default</string>
+    <string name="theme_customization_category">Open</string>
+    <string name="theme_customization_accent_color_title">SystemColor</string>
+    <string name="theme_customization_font_title">Font</string>
+    <string name="theme_customization_icon_shape_title">Icon Shape</string>
+    <string name="enable_setup">Enable Setup</string>
+    <string name="overlay_open">Restart Overlay</string>
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="title_activity_settings_compose">SettingsComposeActivity</string>
+
+    <!-- 通用 -->
+    <string name="back">Back</string>
+    <string name="expand">Expand</string>
+    <string name="collapse">Collapse</string>
+    <string name="title_preferences">Preferences</string>
+    <string name="title_lab">Lab</string>
+
+    <!-- 状态卡 -->
+    <string name="status_app_name">EI</string>
+    <string name="status_version">PreRelease</string>
+
+    <!-- 提示卡 -->
+    <string name="tip_default">Hello World</string>
+    <string name="tip_lab">Experimental</string>
+
+    <!-- 分组标题 -->
+    <string name="section_personalization">Personalization</string>
+    <string name="section_basic">Basic</string>
+    <string name="section_animation">Animation demos</string>
+    <string name="section_module">Modules</string>
+
+    <!-- 个性化分组 -->
+    <string name="theme_settings">Theme settings</string>
+    <string name="theme_settings_desc">Dark / Light / Follow system</string>
+    <string name="installer_settings">Installer settings</string>
+    <string name="installer_settings_desc">Install mode, signature and more</string>
+    <string name="uninstaller_settings">Uninstaller settings</string>
+    <string name="uninstaller_settings_desc">Uninstall options</string>
+    <string name="lab">Lab</string>
+    <string name="lab_desc">Experimental features</string>
+    <string name="preference">Preference</string>
+    <string name="preference_desc">To do</string>
+
+    <!-- 基本分组 -->
+    <string name="network_settings">Network</string>
+    <string name="network_settings_desc">Allow downloading resources online</string>
+    <string name="disable_adb_verify">Disable ADB install verification</string>
+    <string name="disable_adb_verify_desc">Skip install scanning (Play Protect and others)</string>
+    <string name="ignore_battery">Ignore battery optimization</string>
+    <string name="ignore_battery_desc">Keep background installs unrestricted</string>
+    <string name="hide_launcher_icon">Hide launcher icon</string>
+    <string name="hide_launcher_icon_desc">Remove the app entry from the launcher</string>
+
+    <!-- 高级选项 -->
+    <string name="advanced_options">Advanced options</string>
+    <string name="advanced_options_hint">Tap to expand / collapse</string>
+    <string name="advanced_options_desc">Tap to expand / collapse with smooth corner animation</string>
+    <string name="expanded_item">Expanded item</string>
+    <string name="expanded_item_desc">This is the content shown when expanded</string>
+
+    <!-- 高亮卡片 -->
+    <string name="ripple_highlight">Tap ripple highlight</string>
+    <string name="ripple_highlight_desc">Press and drag to see the RuntimeShader highlight follow your finger</string>
+
+    <!-- 实验室 -->
+    <string name="module_flash">Module flashing</string>
+    <string name="module_flash_desc">Enable to choose a root implementation</string>
+    <string name="root_implementation">Root implementation</string>
+    <string name="root_magisk">Magisk</string>
+    <string name="root_kernelsu">KernelSU</string>
+    <string name="root_apatch">APatch</string>
+
+    <!-- 大标题样式 -->
+    <string name="big_title_one">Smooth transition</string>
+    <string name="big_title_two">Gradient vanishes</string>
+    <string name="big_title_original">Original version</string>
+    <string name="big_title_style">Preference BigTitle Switch</string>
+    <string name="main_big_title_style">Compose BigTitle Switch</string>
+    <string name="main_big_title_desc">Compose BigTitle Switch</string>
+    <string name="main_big_title_one">Smooth transition</string>
+    <string name="main_big_title_two">Gradient vanishes</string>
+
+    <!-- preferences.xml -->
+    <string name="category_visual">Visual switches</string>
+    <string name="liquid_glass_bg">Liquid glass background</string>
+    <string name="liquid_glass_bg_desc">Cards use fluid animation with translucent blur</string>
+    <string name="secure_mode">Secure mode</string>
+    <string name="secure_mode_desc">Verify signature and source before installing</string>
+    <string name="pref_hello">hello</string>
+    <string name="pref_test">test</string>
+    <string name="pref_system">System</string>
+    <string name="current_value_format">Current: %s</string>
+
+    <!-- 主题模式选项 -->
+    <string name="theme_mode_follow_system">Follow system</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+
+    <!-- 下拉菜单版本开关 -->
+    <string name="dropdown_popup_new">New dropdown menu</string>
+    <string name="dropdown_popup_new_desc">Turn on to use the new scrollable dropdown menu, turn off to use the old version</string>
+    <string name="overlay_dropdown_switch">Overlay picker as dropdown</string>
+    <string name="overlay_dropdown_switch_desc">On: ComposeDropDownMenuPreference; Off: ComposeListPreference</string>
+    <string name="compose_settings">Settings</string>
+    <string name="status_bar_settings">Status Bar Switch</string>
+    <string name="navigation_bar_settings">Navigation Bar Switch</string>
+    <string name="stop_status_title">Block status bar pull-down</string>
+    <string name="stop_status_summary">Disable notification shade and quick settings; restored after reboot automatically</string>
+    <string name="audio_control_title">Audio control</string>
+    <string name="audio_control_summary">Write Settings.Global audio_control: 1 when on, 0 when off</string>
+    <!-- Settings.Global Butter_set -->
+    <string name="butter_set_title">Battery horizontal</string>
+    <string name="butter_set_summary">Write Settings.Global Butter_set: 1 when on, 0 when off</string>
+    <string name="security_title">Security</string>
+    <string name="security_summary">Control doze-related secure settings</string>
+    <string name="security_doze_enabled_title">Doze</string>
+    <string name="security_doze_enabled_summary">Write Settings.Secure doze_enabled: 1 when on, 0 when off</string>
+    <string name="security_doze_always_on_title">Always-on display</string>
+    <string name="security_doze_always_on_summary">Write Settings.Secure doze_always_on: 1 when on, 0 when off</string>
+    <!-- Generic switch feedback, %1$s = item title -->
+    <string name="pref_switch_on">%1$s on</string>
+    <string name="pref_switch_off">%1$s off</string>
+    <string name="pref_switch_failed">Failed to update %1$s</string>
+    <string name="pref_switch_failed_reason">Failed to update %1$s: %2$s</string>
+    <string name="pref_enable_pkg_ok">Enabled %1$s</string>
+    <string name="pref_enable_pkg_failed">Failed to enable: %1$s</string>
+    <string name="expressive_seekbar_title">Expressive seek bar</string>
+    <string name="expressive_seekbar_desc">Drag to adjust the value</string>
+    <string name="seek_mode_coarse">Coarse</string>
+    <string name="seek_mode_normal">Standard</string>
+    <string name="seek_mode_fine">Fine</string>
+    <string name="seek_mode_title">Slider steps</string>
+
+    <!-- Ported settings cards -->
+    <string name="section_ported">Ported components</string>
+    <string name="ported_switch_title">Switch</string>
+    <string name="ported_switch_desc">Whole card is clickable, switch on the right</string>
+    <string name="ported_enum_title">Enum radio</string>
+    <string name="ported_enum_desc">FlowRow with automatic wrapping</string>
+    <string name="ported_slider_title">Integer slider</string>
+    <string name="ported_slider_desc">Tap the value to type an exact number</string>
+    <string name="ported_input_title">Text input</string>
+    <string name="ported_input_desc">Single line, Enter will not wrap</string>
+    <string name="ported_list_title">Single choice list</string>
+    <string name="ported_list_desc">Expand, pick one, collapse automatically</string>
+    <string name="ported_multi_title">Multi choice list</string>
+    <string name="ported_multi_desc">Check states are written back instantly</string>
+    <string name="ported_id_title">ID list</string>
+    <string name="ported_id_desc">Backed by IDItem(id, title)</string>
+
+    <!-- Developer page -->
+    <string name="dev_title">Developer</string>
+    <string name="contributors_title">Contributors</string>
+    <string name="dev_test_mode_title">TestMode overlay</string>
+    <string name="dev_test_mode_desc">Floats above every app, indicator only, never blocks touches</string>
+    <string name="dev_overlay_permission_hint">"Display over other apps" is not granted yet; toggling will open the permission page</string>
+    <string name="dev_title_test_mode">DeveloperDebugMode \n ByTeYun Studio</string>
+
+    <!-- TestMode overlays -->
+    <string name="dev_test_mode_overlay">DeveloperDebugMode \n By TeYun</string>
+    <string name="dev_preview_overlay">Dev Preview</string>
+    <string name="dev_preview_overlay_en">Dev Preview</string>
+
+    <!-- Developer page: setup wizard check -->
+    <string name="dev_setup_check_title">Setup wizard check</string>
+    <string name="dev_setup_check_desc">Checks device_provisioned, user_setup_complete and setup_wizard_has_run; launches com.android.setup.MainActivity when all are 0</string>
+
+    <!-- ===== 以下为从代码 / XML 中抽取的硬编码文案 ===== -->
+
+    <!-- preferences.xml（原硬编码中文） -->
+    <string name="pref_category_personalization">Personalization</string>
+    <string name="pref_use_blur_title">Frosted glass effect</string>
+    <string name="pref_use_blur_summary">Status card uses a translucent fluid background</string>
+    <string name="pref_category_general">General</string>
+    <string name="pref_reply_action_title">Default reply action</string>
+    <string name="pref_signature_title">Signature</string>
+    <string name="pref_resolution_title" translatable="false">11</string>
+    <string name="pref_resolution_summary">1145: %1$s</string>
+    <string name="pref_about_title">About</string>
+    <string name="pref_about_summary">View version information</string>
+    <string name="pref_multi_select_title">Multi-select sample</string>
+    <string name="pref_multi_select_summary">Tap to select multiple options</string>
+    <string name="pref_category_advanced">Advanced</string>
+
+    <!-- kt_preference.xml -->
+    <string name="kt_clear_cache_title">Clear cache</string>
+    <string name="kt_clear_cache_summary">Tap to clear cached data</string>
+    <string name="kt_category_developer">Developer options</string>
+    <string name="kt_experimental_title">Experimental features</string>
+    <string name="kt_dev_mode_title">Developer mode</string>
+    <string name="kt_expandable_title">Expandable card</string>
+    <string name="kt_expandable_content_title">Expanded card content</string>
+    <string name="kt_expandable_content_summary">Provided by app:otitle / app:osummary</string>
+
+    <!-- root.xml -->
+    <string name="root_pref_title" translatable="false">001</string>
+
+    <!-- 多选示例数组 -->
+    <string name="demo_multi_entry_1">Option one</string>
+    <string name="demo_multi_entry_2">Option two</string>
+    <string name="demo_multi_entry_3">Option three</string>
+    <string name="demo_multi_entry_4">Option four</string>
+
+    <!-- 移植组件演示数据 -->
+    <string name="demo_device_name" translatable="false">TySystemServices</string>
+    <string name="demo_option_a_title">Option A</string>
+    <string name="demo_option_a_summary">First item description</string>
+    <string name="demo_option_b_title">Option B</string>
+    <string name="demo_option_b_summary">Second item description</string>
+    <string name="demo_option_c_title">Option C</string>
+    <string name="demo_option_c_summary">Third item description</string>
+    <string name="demo_id_item_1">Item one</string>
+    <string name="demo_id_item_2">Item two</string>
+    <string name="demo_id_item_3">Item three</string>
+    <string name="demo_current_mode">Current: %1$s</string>
+    <string name="demo_selected_count">%1$d selected</string>
+
+    <!-- TestScreen -->
+    <string name="test_screen_title" translatable="false">TestScreen</string>
+    <string name="test_section_all_enabled">All enabled</string>
+    <string name="test_mode_compact">Compact</string>
+    <string name="test_mode_standard">Standard</string>
+    <string name="test_mode_expanded">Expanded</string>
+    <string name="test_demo_enum_title">Enum radio</string>
+    <string name="test_demo_enum_desc">FlowRow with automatic wrapping</string>
+    <string name="test_demo_slider_title">Integer slider</string>
+    <string name="test_demo_slider_desc">Tap the value on the right to type an exact number</string>
+    <string name="test_demo_input_title">Text input</string>
+    <string name="test_demo_input_desc">Single-line constraint</string>
+    <string name="test_demo_list_title">Single choice list</string>
+    <string name="test_demo_list_desc">Expand, pick one, then collapse</string>
+    <string name="test_demo_disabled_title">Disabled state</string>
+    <string name="test_demo_disabled_desc">enabled = false</string>
+
+    <!-- Contributors -->
+    <string name="contributor_name_teyun" translatable="false">TeYun_Mig_Tyt</string>
+    <string name="contributor_name_supporter" translatable="false">Name</string>
+    <string name="contributor_name_lineageos" translatable="false">LineageOS</string>
+    <string name="contributor_name_deepseek" translatable="false">DeepSeek</string>
+    <string name="contributor_role_maintainer">Project maintainer</string>
+    <string name="contributor_summary_maintainer">System modifications, service integration, idea implementation and project testing</string>
+    <string name="contributor_role_supporter">Project support</string>
+    <string name="contributor_summary_supporter">...built in at light speed (OvO)</string>
+    <string name="contributor_role_reference">Reference project (open source)</string>
+    <string name="contributor_summary_reference">Most of the features come from here</string>
+    <string name="contributor_role_assistant">Assistant</string>
+    <string name="contributor_summary_assistant">Project development, Smali modifications</string>
+
+    <!-- Developer page: tap-to-unlock gate -->
+    <string name="dev_unlock_remaining_taps">%1$d more taps to unlock Developer</string>
+    <string name="dev_unlock_dialog_title">Developer access</string>
+    <string name="dev_unlock_dialog_message">Enter the password to continue.</string>
+    <string name="dev_unlock_password_label">Password</string>
+    <string name="dev_unlock_password_error">Wrong password, try again</string>
+    <string name="dev_unlock_confirm">Unlock</string>
+    <string name="dev_unlock_cancel">Cancel</string>
+    <string name="dev_unlock_show_password">Show password</string>
+    <string name="dev_unlock_hide_password">Hide password</string>
+
+    <!-- Developer page: entry guard -->
+    <string name="dev_denied">Open Developer from the settings home screen</string>
+
+    <!-- Snackbar: confirm button -->
+    <string name="snackbar_confirm">OK</string>
+
+    <!-- 熄屏显示（AOD） -->
+    <string name="aod_battery">%1$d%%</string>
+    <string name="aod_battery_charging">%1$d%% · Charging</string>
+    <string name="aod_hint_tap_unlock">Tap to unlock</string>
+
+    <!-- Contributor cloud (ported from LineageParts) -->
+    <string name="contributors_cloud_title">Contributor cloud</string>
+    <string name="contributors_cloud_search_hint">Search name or username</string>
+    <string name="contributors_cloud_clear">Clear</string>
+    <string name="contributors_cloud_reset">Reset view</string>
+    <string name="contributors_cloud_locate">Locate</string>
+    <string name="contributors_cloud_close">Close</string>
+    <string name="contributors_cloud_loading">Drawing the cloud…</string>
+    <string name="contributors_cloud_failed">Contributor database unavailable</string>
+    <string name="contributors_cloud_not_found">“%1$s” is not in this contributor database</string>
+    <string name="contributors_cloud_commits">%1$s commits</string>
+    <string name="contributors_cloud_stats_title">About this cloud</string>
+    <string name="contributors_cloud_stats_message">Contributors: %1$s\nCommits: %2$s\nUpdated: %3$s</string>
+
+    <!-- 终端 -->
+    <string name="termux_app_name">Terminal</string>
+    <string name="termux_launcher_title">Terminal on home screen</string>
+    <string name="termux_launcher_desc">Show the Terminal icon in the launcher; turn off to hide it</string>
+    <string name="termux_launcher_hidden">Hidden from home screen</string>
+    <string name="termux_session_name">Session %1$d</string>
+    <string name="termux_menu_new_session">New session</string>
+    <string name="termux_menu_close_session">Close session</string>
+    <string name="termux_menu_settings">Settings</string>
+    <string name="termux_settings_title">Terminal settings</string>
+    <string name="termux_pref_volume_key">Volume keys</string>
+    <string name="termux_pref_volume_key_summary">Use volume keys to scroll the terminal</string>
+    <string name="termux_pref_fullscreen">Fullscreen</string>
+    <string name="termux_pref_fullscreen_summary">Hide the status bar while using the terminal</string>
+    <string name="termux_pref_orientation">Screen orientation</string>
+    <string name="termux_pref_font_size">Font size</string>
+    <string name="termux_pref_colors">Colors</string>
+    <string name="termux_orientation_automatic">Automatic</string>
+    <string name="termux_orientation_portrait">Portrait</string>
+    <string name="termux_orientation_landscape">Landscape</string>
+    <string name="termux_color_white_on_black">White on black</string>
+    <string name="termux_color_black_on_white">Black on white</string>
+    <string name="termux_color_green_on_black">Green on black</string>
+    <string name="termux_session_ended">Session ended</string>
+    <string name="termux_press_back_again">Press back again to exit</string>
+    <string name="termux_pref_category_ui">Interface</string>
+    <string name="termux_pref_category_display">Display</string>
+    <string name="copy_text">Copy</string>
+    <string name="paste_text">Paste</string>
+    <string name="text_selection_more">More…</string>
+</resources>

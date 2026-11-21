@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    XmlPreferenceActivity 顶部的品牌 Logo 卡片。
+
+    结构：
+    FrameLayout（外边距，与其它选项的 16dp 对齐）
+      └ 圆角容器（background = logo_block_outline，clipToOutline 让子视图被裁成圆角）
+          ├ ImageView：harmonyos_logo_bg 铺满，centerCrop 不拉伸
+          └ ImageView：emui_brand_logo 居中，固定 200×70dp（矢量原始比例 400:140）
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="16dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="8dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:background="@drawable/logo_block_outline"
+        android:clipToOutline="true">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop"
+            android:src="@drawable/harmonyos_logo_bg" />
+
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="70dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/emui_brand_logo" />
+    </FrameLayout>
+</FrameLayout>

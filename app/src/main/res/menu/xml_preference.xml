@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    XmlPreferenceActivity 的工具栏菜单。
+    - showAsAction="always" 的项 → Toolbar 上的圆形图标按钮
+    - 其余项 → M3 Expressive 卡片式溢出菜单（按 group 分组，组间有分隔线）
+    增删项直接改这里即可，基类会自动重新排版。
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group android:id="@+id/menu_group_actions">
+        <item
+            android:id="@+id/action_contributors"
+            android:icon="@drawable/ic_menu_contributors"
+            android:title="@string/contributors_title"
+            app:showAsAction="always" />
+    </group>
+
+    <group android:id="@+id/menu_group_pages">
+        <item
+            android:id="@+id/action_security"
+            android:icon="@drawable/ic_menu_security"
+            android:title="@string/security_title"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_terminal"
+            android:icon="@drawable/ic_menu_terminal"
+            android:title="@string/termux_app_name"
+            app:showAsAction="never" />
+    </group>
+
+    <group android:id="@+id/menu_group_about">
+        <item
+            android:id="@+id/action_about"
+            android:icon="@drawable/ic_menu_about"
+            android:title="@string/pref_about_title"
+            app:showAsAction="never" />
+    </group>
+</menu>

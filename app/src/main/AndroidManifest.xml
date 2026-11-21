@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:sharedUserId="android.uid.system">
+
+    <uses-permission
+        android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- 禁止下拉状态栏使用，signature|privileged，平台签名后自动授予 -->
+    <uses-permission
+        android:name="android.permission.STATUS_BAR"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- TestMode 悬浮窗（开发调试页使用），系统应用默认已授予 -->
+    <uses-permission
+        android:name="android.permission.SYSTEM_ALERT_WINDOW"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- 熄屏显示轻触唤醒：FULL_WAKE_LOCK 走 PowerManagerService 的 wakeUp 路径 -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- 轻触唤醒调 PowerManager.wakeUp()，signature|privileged，平台签名自动授予 -->
+    <uses-permission
+        android:name="android.permission.DEVICE_POWER"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- 退出开机向导后重启设备，signature|privileged，平台签名自动授予 -->
+    <uses-permission
+        android:name="android.permission.REBOOT"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- 判断 com.android.setup 是否在前台，signature|privileged，平台签名自动授予 -->
+    <uses-permission
+        android:name="android.permission.REAL_GET_TASKS"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- 开机后重放 disable 标志 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- enablePackage() 动态启用组件时需要，原清单漏声明 -->
+    <uses-permission
+        android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"
+        tools:ignore="ProtectedPermissions" />
+
+    <application
+        android:name=".service.ServiceSettings"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@drawable/ic_launcher_settings"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SystemServices">
+
+        <activity
+            android:name=".compose.SettingsComposeActivity"
+            android:exported="false"
+            android:label="@string/title_activity_settings_compose"
+            android:theme="@style/Open.MigPreference" />
+        <activity
+            android:name=".WelSetActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Overlay.OverlayActivity"
+            android:theme="@style/Open.MigPreference"
+            android:exported="false" />
+        <activity
+            android:name=".AboutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="true"
+            android:theme="@style/Open.MigPreference"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- 安全设置：Settings.Secure 的 doze 开关，仅应用内跳转 -->
+        <activity
+            android:name=".SecurityActivity"
+            android:exported="false"
+            android:theme="@style/Open.MigPreference"
+            android:label="@string/security_title" />
+
+        <!-- 终端：桌面独立入口（LAUNCHER），图标与主设置页分开 -->
+        <activity
+            android:name=".terminal.TermuxActivity"
+            android:exported="true"
+            android:icon="@mipmap/ic_termux_launcher"
+            android:roundIcon="@mipmap/ic_termux_launcher"
+            android:label="@string/termux_app_name"
+            android:theme="@style/Theme.SystemServices.Termux"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".terminal.TermuxSettingsActivity"
+            android:exported="false"
+            android:label="@string/termux_settings_title"
+            android:theme="@style/Theme.SystemServices.Termux" />
+
+        <service
+            android:name=".terminal.TermuxService"
+            android:exported="false" />
+
+        <activity-alias
+            android:name=".TopLevelSettingsActivity"
+            android:enabled="true"
+            android:exported="true"
+            android:targetActivity=".SettingsActivity">
+            <intent-filter>
+                <action android:name="com.android.settings.action.IA_SETTINGS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="com.android.settings.category"
+                android:value="com.android.settings.category.ia.homepage" />
+            <meta-data
+                android:name="com.android.settings.title"
+                android:resource="@string/app_title" />
+            <meta-data
+                android:name="com.android.settings.summary"
+                android:resource="@string/summary" />
+            <meta-data
+                android:name="com.android.settings.icon"
+                android:resource="@drawable/ic_settings_24dp" />
+            <meta-data
+                android:name="com.android.settings.order"
+                android:value="190" />
+        </activity-alias>
+        <activity-alias
+            android:name=".TopLevelContributorsActivity"
+            android:enabled="true"
+            android:exported="true"
+            android:targetActivity=".compose.ContributorsActivity">
+            <intent-filter>
+                <action android:name="com.android.settings.action.IA_SETTINGS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="com.android.settings.category"
+                android:value="com.android.settings.category.ia.my_device_info" />
+            <meta-data
+                android:name="com.android.settings.title"
+                android:resource="@string/contributors_title" />
+            <meta-data
+                android:name="com.android.settings.icon"
+                android:resource="@drawable/ic_settings_24dp" />
+            <meta-data
+                android:name="com.android.settings.order"
+                android:value="-1" />
+        </activity-alias>
+
+        <activity
+            android:name=".compose.MingActivity"
+            android:exported="true" />
+        <activity
+            android:name=".compose.LabActivity"
+            android:exported="false" />
+        <activity
+            android:name=".compose.DevActivity"
+            android:theme="@style/Open.MigPreference"
+            android:exported="false" />
+        <activity
+            android:name=".compose.ContributorsActivity"
+            android:theme="@style/Open.MigPreference"
+            android:exported="true" />
+        <activity
+            android:name=".compose.ContributorsDbActivity"
+            android:theme="@style/Open.MigPreference"
+            android:exported="false" />
+        <activity
+            android:name=".compose.TestActivity"
+            android:theme="@style/Open.MigPreference"
+            android:exported="false" />
+        <activity
+            android:name=".compose.ui.preference.XmlPreferenceActivity"
+            android:exported="true" />
+
+        <!-- 悬浮窗守护服务：由 system_server 直接启动，应用内也用它做常驻 -->
+        <service
+            android:name=".service.ServiceDaemonService"
+            android:exported="false"
+            android:stopWithTask="false" />
+        <!--
+            熄屏显示（AOD）：把 framework-res 的 config_dozeComponent 指向本服务后接管 doze。
+            BIND_DREAM_SERVICE 是 signature 级权限，必须以平台签名预置安装。
+            directBootAware：开机未解锁时也要能进 doze。
+        -->
+        <service
+            android:name=".aod.AodDozeService"
+            android:directBootAware="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_DREAM_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+            </intent-filter>
+        </service>
+
+
+        <!-- 闹钟自唤醒的落点 -->
+        <receiver
+            android:name=".service.ServiceDaemonReceiver"
+            android:exported="false" />
+
+        <!-- 开机 / 覆盖安装后重新下发「禁止下拉状态栏」标志 -->
+        <receiver
+            android:name=".service.BootCompletedReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ty系统服务</string>
+    <string name="app_title">系统服务设置</string>
+    <string name="summary">打开系统服务设置</string>
+    <string name="theme_customization_device_default">设备默认</string>
+    <string name="theme_customization_category">Open</string>
+    <string name="theme_customization_accent_color_title">强调色</string>
+    <string name="theme_customization_font_title">字体</string>
+    <string name="theme_customization_icon_shape_title">图标形状</string>
+    <string name="enable_setup">启用Setup</string>
+    <string name="overlay_open">切换Overlay</string>
+    <string name="dropdown_popup_new">新下拉菜单</string>
+    <string name="dropdown_popup_new_desc">开启使用可滚动的新版下拉菜单</string>
+    <string name="overlay_dropdown_switch">Overlay 选择器使用下拉菜单</string>
+    <string name="overlay_dropdown_switch_desc">开启使用 ComposeDropDownMenuPreference，关闭使用 ComposeListPreference</string>
+    <string name="big_title_one">平滑过渡</string>
+    <string name="big_title_two">渐变消失</string>
+    <string name="big_title_original">原顶部栏</string>
+    <string name="main_big_title_style">Compose大标题切换</string>
+    <string name="main_big_title_desc">Compose大标题切换</string>
+    <string name="big_title_style">Preference大标题切换</string>
+    <string name="main_big_title_one">平滑过渡</string>
+    <string name="main_big_title_two">渐变消失</string>
+    <string name="compose_settings">设置</string>
+    <string name="status_bar_settings">状态栏</string>
+    <string name="navigation_bar_settings">导航栏</string>
+    <string name="stop_status_title">禁止下拉状态栏</string>
+    <string name="stop_status_summary">屏蔽通知栏与快捷设置的下拉手势，重启后自动恢复</string>
+    <string name="audio_control_title">音频控制</string>
+    <string name="audio_control_summary">写入 Settings.Global 的 audio_control：开启为 1，关闭为 0</string>
+    <!-- Settings.Global Butter_set -->
+    <string name="butter_set_title">电池横向</string>
+    <string name="butter_set_summary">写入 Settings.Global 的 Butter_set：开启为 1，关闭为 0</string>
+    <string name="security_title">安全设置</string>
+    <string name="security_summary">控制熄屏显示（Doze）相关的安全设置</string>
+    <string name="security_doze_enabled_title">熄屏显示</string>
+    <string name="security_doze_enabled_summary">写入 Settings.Secure 的 doze_enabled：开启为 1，关闭为 0</string>
+    <string name="security_doze_always_on_title">常亮显示</string>
+    <string name="security_doze_always_on_summary">写入 Settings.Secure 的 doze_always_on：开启为 1，关闭为 0</string>
+    <!-- 开关通用反馈，%1$s = 条目标题 -->
+    <string name="pref_switch_on">%1$s 开启</string>
+    <string name="pref_switch_off">%1$s 关闭</string>
+    <string name="pref_switch_failed">%1$s 设置失败</string>
+    <string name="pref_switch_failed_reason">%1$s 设置失败：%2$s</string>
+    <string name="pref_enable_pkg_ok">已启用 %1$s</string>
+    <string name="pref_enable_pkg_failed">启用失败：%1$s</string>
+    <string name="expressive_seekbar_title">Expressive 滑杆</string>
+    <string name="expressive_seekbar_desc">拖动调整数值</string>
+    <string name="seek_mode_coarse">粗调</string>
+    <string name="seek_mode_normal">标准</string>
+    <string name="seek_mode_fine">细调</string>
+    <string name="seek_mode_title">滑杆档位</string>
+
+    <!-- 移植组件分组 -->
+    <string name="section_ported">移植组件</string>
+    <string name="ported_switch_title">开关</string>
+    <string name="ported_switch_desc">整卡可点，右侧开关联动</string>
+    <string name="ported_enum_title">枚举单选</string>
+    <string name="ported_enum_desc">FlowRow 自动换行</string>
+    <string name="ported_slider_title">整数滑杆</string>
+    <string name="ported_slider_desc">点击右侧数值可精确输入</string>
+    <string name="ported_input_title">文本输入</string>
+    <string name="ported_input_desc">单行约束，回车不换行</string>
+    <string name="ported_list_title">列表单选</string>
+    <string name="ported_list_desc">展开后点选并自动收起</string>
+    <string name="ported_multi_title">列表多选</string>
+    <string name="ported_multi_desc">勾选状态实时回写</string>
+    <string name="ported_id_title">ID 列表</string>
+    <string name="ported_id_desc">IDItem(id, title) 数据</string>
+
+    <!-- 开发调试页 -->
+    <string name="dev_title">开发调试</string>
+    <string name="contributors_title">贡献者</string>
+    <string name="dev_test_mode_title">TestMode 悬浮窗</string>
+    <string name="dev_test_mode_desc">置于所有应用之上，仅作状态指示，不拦截触摸</string>
+    <string name="dev_overlay_permission_hint">尚未授予「显示在其他应用上层」权限，点击开关会跳转授权页</string>
+    <string name="dev_title_test_mode">开发人员调试模式 \n By TeYun</string>
+
+    <!-- 从默认 strings 迁移过来的中文 -->
+    <string name="back">返回</string>
+    <string name="expand">展开</string>
+    <string name="collapse">收起</string>
+    <string name="title_preferences">偏好设置</string>
+    <string name="title_lab">实验室</string>
+    <string name="tip_lab">实验性Test</string>
+    <string name="section_animation">动画演示</string>
+    <string name="section_module">模块</string>
+    <string name="theme_settings">主题设置</string>
+    <string name="theme_settings_desc">深色 / 浅色 / 跟随系统</string>
+    <string name="installer_settings">安装器设置</string>
+    <string name="installer_settings_desc">安装模式、签名等</string>
+    <string name="uninstaller_settings">卸载器设置</string>
+    <string name="uninstaller_settings_desc">卸载选项</string>
+    <string name="lab">实验室</string>
+    <string name="lab_desc">实验性功能</string>
+    <string name="network_settings">网络设置</string>
+    <string name="network_settings_desc">允许联网下载资源</string>
+    <string name="disable_adb_verify">停用 ADB 安装验证</string>
+    <string name="disable_adb_verify_desc">禁止安装扫描（Play 保护机制等）</string>
+    <string name="ignore_battery">忽略电池优化</string>
+    <string name="ignore_battery_desc">后台安装不被系统限制</string>
+    <string name="hide_launcher_icon">隐藏启动器图标</string>
+    <string name="hide_launcher_icon_desc">从桌面隐藏应用入口</string>
+    <string name="advanced_options">高级选项</string>
+    <string name="advanced_options_hint">点击展开 / 收起</string>
+    <string name="advanced_options_desc">点击展开 / 收起，圆角平滑过渡</string>
+    <string name="expanded_item">展开的子项</string>
+    <string name="expanded_item_desc">这是展开后显示的内容</string>
+    <string name="ripple_highlight">点按水波高亮</string>
+    <string name="ripple_highlight_desc">按住并拖动可看到 RuntimeShader 高亮跟随手指</string>
+    <string name="module_flash">模块刷写</string>
+    <string name="module_flash_desc">开启后选择 Root 实现</string>
+    <string name="root_implementation">Root 实现</string>
+    <string name="category_visual">视觉开关</string>
+    <string name="liquid_glass_bg">液态玻璃背景</string>
+    <string name="liquid_glass_bg_desc">卡片使用流体动画 + 半透明模糊</string>
+    <string name="secure_mode">安全模式</string>
+    <string name="secure_mode_desc">安装前进行签名与来源校验</string>
+    <string name="current_value_format">当前：%s</string>
+    <string name="theme_mode_follow_system">跟随系统</string>
+    <string name="theme_mode_light">浅色模式</string>
+    <string name="theme_mode_dark">深色模式</string>
+
+    <!-- TestMode 浮层 -->
+    <string name="dev_preview_overlay">预览开发阶段</string>
+    <string name="dev_preview_overlay_en">Dev Preview</string>
+    <string name="dev_test_mode_overlay">开发调试模式 \n By TeYun</string>
+
+    <!-- 开发调试页：开机向导检测开关 -->
+    <string name="dev_setup_check_title">开机向导检测</string>
+    <string name="dev_setup_check_desc">检测 device_provisioned、user_setup_complete、setup_wizard_has_run，三者都为 0 时拉起 com.android.setup.MainActivity</string>
+
+    <!-- ===== 补齐默认 strings 中存在、此前未翻译的条目 ===== -->
+    <string name="messages_header">消息</string>
+    <string name="sync_header">同步</string>
+    <string name="signature_title">你的签名</string>
+    <string name="reply_title">默认回复方式</string>
+    <string name="sync_title">定期同步邮件</string>
+    <string name="attachment_title">下载收到的附件</string>
+    <string name="attachment_summary_on">自动下载收到的邮件附件</string>
+    <string name="attachment_summary_off">仅在手动请求时下载附件</string>
+    <string name="title_activity_settings_compose">设置（Compose）</string>
+    <string name="status_app_name">EI</string>
+    <string name="status_version">预发布</string>
+    <string name="tip_default">Hello World</string>
+    <string name="section_personalization">个性化</string>
+    <string name="section_basic">基本</string>
+    <string name="preference">偏好设置</string>
+    <string name="preference_desc">待完成</string>
+    <string name="root_magisk">Magisk</string>
+    <string name="root_kernelsu">KernelSU</string>
+    <string name="root_apatch">APatch</string>
+    <string name="pref_hello">你好</string>
+    <string name="pref_test">测试</string>
+    <string name="pref_system">系统</string>
+
+    <!-- ===== 从代码 / XML 中抽取的硬编码文案 ===== -->
+
+    <!-- preferences.xml（原硬编码中文） -->
+    <string name="pref_category_personalization">个性化</string>
+    <string name="pref_use_blur_title">毛玻璃效果</string>
+    <string name="pref_use_blur_summary">状态卡使用半透明流体背景</string>
+    <string name="pref_category_general">通用</string>
+    <string name="pref_reply_action_title">默认回复方式</string>
+    <string name="pref_signature_title">签名</string>
+    <string name="pref_resolution_summary">1145: %1$s</string>
+    <string name="pref_about_title">关于</string>
+    <string name="pref_about_summary">查看版本信息</string>
+    <string name="pref_multi_select_title">多选示例</string>
+    <string name="pref_multi_select_summary">点击选择多个选项</string>
+    <string name="pref_category_advanced">高级</string>
+
+    <!-- kt_preference.xml -->
+    <string name="kt_clear_cache_title">清除缓存</string>
+    <string name="kt_clear_cache_summary">点击清除缓存</string>
+    <string name="kt_category_developer">开发选项</string>
+    <string name="kt_experimental_title">实验性功能</string>
+    <string name="kt_dev_mode_title">开发模式</string>
+    <string name="kt_expandable_title">折叠卡片</string>
+    <string name="kt_expandable_content_title">折叠卡片内容</string>
+    <string name="kt_expandable_content_summary">由 app:otitle / app:osummary 提供</string>
+
+    <!-- 多选示例数组 -->
+    <string name="demo_multi_entry_1">选项一</string>
+    <string name="demo_multi_entry_2">选项二</string>
+    <string name="demo_multi_entry_3">选项三</string>
+    <string name="demo_multi_entry_4">选项四</string>
+
+    <!-- 移植组件演示数据 -->
+    <string name="demo_option_a_title">选项 A</string>
+    <string name="demo_option_a_summary">第一项说明</string>
+    <string name="demo_option_b_title">选项 B</string>
+    <string name="demo_option_b_summary">第二项说明</string>
+    <string name="demo_option_c_title">选项 C</string>
+    <string name="demo_option_c_summary">第三项说明</string>
+    <string name="demo_id_item_1">条目一</string>
+    <string name="demo_id_item_2">条目二</string>
+    <string name="demo_id_item_3">条目三</string>
+    <string name="demo_current_mode">当前：%1$s</string>
+    <string name="demo_selected_count">已选 %1$d 项</string>
+
+    <!-- TestScreen -->
+    <string name="test_section_all_enabled">全部启用</string>
+    <string name="test_mode_compact">紧凑</string>
+    <string name="test_mode_standard">标准</string>
+    <string name="test_mode_expanded">扩展</string>
+    <string name="test_demo_enum_title">枚举单选</string>
+    <string name="test_demo_enum_desc">FlowRow 自动换行</string>
+    <string name="test_demo_slider_title">整数滑杆</string>
+    <string name="test_demo_slider_desc">点右侧数值可精确输入</string>
+    <string name="test_demo_input_title">文本输入</string>
+    <string name="test_demo_input_desc">单行约束</string>
+    <string name="test_demo_list_title">列表单选</string>
+    <string name="test_demo_list_desc">展开后点选并收起</string>
+    <string name="test_demo_disabled_title">禁用态</string>
+    <string name="test_demo_disabled_desc">enabled = false</string>
+
+    <!-- Contributors -->
+    <string name="contributor_role_maintainer">项目维护</string>
+    <string name="contributor_summary_maintainer">系统修改，服务添加，想法实现，项目测试</string>
+    <string name="contributor_role_supporter">项目支持</string>
+    <string name="contributor_summary_supporter">...光速内置(OvO)</string>
+    <string name="contributor_role_reference">借鉴对象(开源的)</string>
+    <string name="contributor_summary_reference">项目大部分功能都是取这里的</string>
+    <string name="contributor_role_assistant">辅助</string>
+    <string name="contributor_summary_assistant">项目开发，Smali修改</string>
+
+    <!-- 开发调试页：连点解锁 -->
+    <string name="dev_unlock_remaining_taps">还需点击 %1$d 次才能进入开发调试</string>
+    <string name="dev_unlock_dialog_title">开发调试</string>
+    <string name="dev_unlock_dialog_message">请输入密码后继续。</string>
+    <string name="dev_unlock_password_label">密码</string>
+    <string name="dev_unlock_password_error">密码错误，请重试</string>
+    <string name="dev_unlock_confirm">解锁</string>
+    <string name="dev_unlock_cancel">取消</string>
+    <string name="dev_unlock_show_password">显示密码</string>
+    <string name="dev_unlock_hide_password">隐藏密码</string>
+
+    <!-- 开发调试页：入口校验 -->
+    <string name="dev_denied">请从设置首页进入开发调试</string>
+
+    <!-- Snackbar：确定按钮 -->
+    <string name="snackbar_confirm">确定</string>
+
+    <!-- 熄屏显示（AOD） -->
+    <string name="aod_battery">%1$d%%</string>
+    <string name="aod_battery_charging">%1$d%% · 充电中</string>
+    <string name="aod_hint_tap_unlock">轻触解锁</string>
+
+    <!-- 贡献者云（复刻 LineageParts） -->
+    <string name="contributors_cloud_title">贡献者云</string>
+    <string name="contributors_cloud_search_hint">搜索姓名或用户名</string>
+    <string name="contributors_cloud_clear">清除</string>
+    <string name="contributors_cloud_reset">重置视图</string>
+    <string name="contributors_cloud_locate">定位</string>
+    <string name="contributors_cloud_close">关闭</string>
+    <string name="contributors_cloud_loading">正在生成云图…</string>
+    <string name="contributors_cloud_failed">贡献者数据库不可用</string>
+    <string name="contributors_cloud_not_found">贡献者库里没有“%1$s”</string>
+    <string name="contributors_cloud_commits">%1$s 次提交</string>
+    <string name="contributors_cloud_stats_title">关于这张云图</string>
+    <string name="contributors_cloud_stats_message">贡献者：%1$s\n提交数：%2$s\n数据更新：%3$s</string>
+
+    <!-- 终端 -->
+    <string name="termux_app_name">终端</string>
+    <string name="termux_launcher_title">桌面显示终端入口</string>
+    <string name="termux_launcher_desc">在桌面显示 Terminal 图标，关闭则隐藏</string>
+    <string name="termux_launcher_hidden">已从桌面隐藏</string>
+    <string name="termux_session_name">会话 %1$d</string>
+    <string name="termux_menu_new_session">新建会话</string>
+    <string name="termux_menu_close_session">关闭会话</string>
+    <string name="termux_menu_settings">设置</string>
+    <string name="termux_settings_title">终端设置</string>
+    <string name="termux_pref_volume_key">音量键功能</string>
+    <string name="termux_pref_volume_key_summary">使用音量键滚动终端</string>
+    <string name="termux_pref_fullscreen">全屏模式</string>
+    <string name="termux_pref_fullscreen_summary">使用终端时隐藏状态栏</string>
+    <string name="termux_pref_orientation">屏幕方向</string>
+    <string name="termux_pref_font_size">字号</string>
+    <string name="termux_pref_colors">配色</string>
+    <string name="termux_orientation_automatic">自动</string>
+    <string name="termux_orientation_portrait">竖屏</string>
+    <string name="termux_orientation_landscape">横屏</string>
+    <string name="termux_color_white_on_black">黑底白字</string>
+    <string name="termux_color_black_on_white">白底黑字</string>
+    <string name="termux_color_green_on_black">黑底绿字</string>
+    <string name="termux_session_ended">会话已结束</string>
+    <string name="termux_press_back_again">再按一次退出</string>
+    <string name="termux_pref_category_ui">界面</string>
+    <string name="termux_pref_category_display">显示</string>
+    <string name="copy_text">复制</string>
+    <string name="paste_text">粘贴</string>
+    <string name="text_selection_more">更多…</string>
+</resources>
