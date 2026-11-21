@@ -3,8 +3,22 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.refine)
 }
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { localProperties.load(it) }
+}
 
 android {
+    signingConfigs {
+        migtyt {
+            storeFile file(localProperties.getProperty("RELEASE_STORE_FILE"))
+            storePassword localProperties.getProperty("RELEASE_STORE_PASSWORD")
+            keyAlias localProperties.getProperty("RELEASE_KEY_ALIAS")
+            keyPassword localProperties.getProperty("RELEASE_KEY_PASSWORD")
+            storeType "PKCS12"
+        }
+    }
     namespace 'com.android.ty.systemservices'
     compileSdk {
         version = release(37) {
@@ -20,8 +34,6 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        // 终端 pty 桥：四个 ABI 都出，虚拟机/真机都能装
         ndk {
             abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
         }
@@ -36,6 +48,7 @@ android {
 
     buildTypes {
         release {
+            signingConfig signingConfigs.migtyt
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
