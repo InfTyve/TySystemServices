@@ -8,6 +8,7 @@
     <string name="theme_customization_font_title">Font</string>
     <string name="theme_customization_icon_shape_title">Icon Shape</string>
     <string name="enable_setup">Enable Setup</string>
+    <string name="tysystem_project">Project</string>
     <string name="overlay_open">Restart Overlay</string>
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
