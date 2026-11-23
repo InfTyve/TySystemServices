@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.DropdownMenuGroup
@@ -27,8 +26,6 @@ import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.DropdownMenuPopupPositionProvider
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
@@ -39,7 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.TransformOrigin
@@ -222,7 +218,10 @@ private class ToolbarOverflowPositionProvider(
 }
 
 /**
- * 圆形图标按钮。动作项用菜单自带的图标（Bitmap），溢出按钮用内置矢量图标。
+ * 工具栏右侧的图标按钮。
+ *
+ * 容器、形状、颜色全部交给 [ExpressiveIconCard]，和左侧返回按钮是同一张卡；
+ * 这里只负责在 Bitmap 图标 / 矢量图标 / 首字母之间选一个画。
  */
 @Composable
 private fun ExpressiveMenuIconButton(
@@ -239,15 +238,12 @@ private fun ExpressiveMenuIconButton(
         MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
     }
 
-    IconButton(
-        onClick = onClick,
+    ExpressiveIconCard(
+        modifier = modifier,
+        size = 44.dp,
+        contentColor = tint,
         enabled = enabled,
-        modifier = modifier.size(44.dp),
-        shapes = IconButtonDefaults.shapes(shape = CircleShape),
-        colors = IconButtonDefaults.iconButtonColors(
-            containerColor = Color.Transparent,
-            contentColor = tint,
-        ),
+        onClick = onClick,
     ) {
         when {
             vectorIcon != null -> Icon(

@@ -12,6 +12,12 @@
     <attr name="otitle" format="reference|string" />
     <attr name="osummary" format="reference|string" />
 
+    <!-- 滑杆的取值范围与刻度和单位后缀 -->
+    <attr name="sliderMin" format="float" />
+    <attr name="sliderMax" format="float" />
+    <attr name="sliderStep" format="float" />
+    <attr name="sliderValueSuffix" format="string" />
+
     <declare-styleable name="ComposePreference">
         <attr name="cardPosition" />
         <attr name="iconDrawable" />
@@ -24,5 +30,15 @@
         <attr name="iconDrawable" />
         <attr name="otitle" />
         <attr name="osummary" />
+    </declare-styleable>
+
+    <!-- ComposeSliderPreference：滑杆条目的取值范围、步长与单位后缀 -->
+    <declare-styleable name="ComposeSliderPreference">
+        <attr name="cardPosition" />
+        <attr name="iconDrawable" />
+        <attr name="sliderMin" />
+        <attr name="sliderMax" />
+        <attr name="sliderStep" />
+        <attr name="sliderValueSuffix" />
     </declare-styleable>
 </resources>

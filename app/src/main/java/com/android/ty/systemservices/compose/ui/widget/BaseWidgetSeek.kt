@@ -11,9 +11,15 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -42,7 +48,13 @@ import androidx.compose.ui.unit.dp
  * @param modifier 外部修饰符
  * @param valueRange 取值范围
  * @param steps 档位数（0 表示连续）
- * @param containerColor 卡片底色，默认 surfaceBright
+ * @param containerColor 卡片底色，默认 surfaceBright；从 Preference 接入时传
+ *   `CyanBlue.copy(alpha = 0.14f)`，与同组其它条目保持一致
+ * @param accentColor 图标与描述文字的颜色，默认 onSurfaceVariant；
+ *   从 Preference 接入时传 `CyanBlue`
+ * @param sliderColors 滑杆配色；传 null 用默认（主色轨道 + 透明刻度点）
+ * @param onProgressChangeFinished 松手回调，带最终值——需要持久化的调用方在这里写盘，
+ *   拖动过程中只更新界面，避免每帧都落一次 SharedPreferences
  */
 @Composable
 fun BaseWidget_Seek(
@@ -54,6 +66,9 @@ fun BaseWidget_Seek(
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     steps: Int = 0,
     containerColor: Color? = null,
+    accentColor: Color? = null,
+    sliderColors: SliderColors? = null,
+    onProgressChangeFinished: (Float) -> Unit = {},
 ) {
     val shape = LocalSegmentedItemShape.current
     val title = item.resolvedTitle()
@@ -64,9 +79,10 @@ fun BaseWidget_Seek(
         // 底色交给外层 Column，ListItem 保持透明，避免圆角处出现双层面
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        leadingContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        // 图标与描述跟随 accentColor，和同组其它条目同一套着色
+        leadingContentColor = accentColor ?: MaterialTheme.colorScheme.onSurfaceVariant,
         trailingContentColor = MaterialTheme.colorScheme.primary,
-        supportingContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        supportingContentColor = accentColor ?: MaterialTheme.colorScheme.onSurfaceVariant,
     )
 
     val leading: (@Composable () -> Unit)? = when {
@@ -122,13 +138,22 @@ fun BaseWidget_Seek(
             },
             colors = colors,
         )
+        // 记住最近一次拖动值：Slider 的 onValueChangeFinished 不带参数，
+        // 松手时用它把「最终值」回给调用方（持久化用）
+        var latest by remember { mutableFloatStateOf(progress) }
+        LaunchedEffect(progress) { latest = progress }
+
         Slider(
             value = progress,
-            onValueChange = onProgressChange,
+            onValueChange = {
+                latest = it
+                onProgressChange(it)
+            },
             valueRange = valueRange,
             steps = steps,
             enabled = enabled,
-            colors = SliderDefaults.colors(
+            onValueChangeFinished = { onProgressChangeFinished(latest) },
+            colors = sliderColors ?: SliderDefaults.colors(
                 thumbColor = MaterialTheme.colorScheme.primary,
                 activeTrackColor = MaterialTheme.colorScheme.primary,
                 activeTickColor = Color.Transparent,

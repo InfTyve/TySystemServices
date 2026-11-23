@@ -8,6 +8,17 @@
     <string name="theme_customization_font_title">Font</string>
     <string name="theme_customization_icon_shape_title">Icon Shape</string>
     <string name="enable_setup">Enable Setup</string>
+    <string name="tysystem_project">Project</string>
+    <string name="link_open_failed">No app can open this link</string>
+    <!-- AboutScreen 功能卡片（占位，可随意替换） -->
+    <string name="about_card_terminal_title">Terminal</string>
+    <string name="about_card_terminal_desc">Interactive shell built in</string>
+    <string name="about_card_aod_title">Always-on display</string>
+    <string name="about_card_aod_desc">Doze layout and tap to wake</string>
+    <string name="about_card_security_title">Security</string>
+    <string name="about_card_security_desc">Doze and lock screen switches</string>
+    <string name="about_card_contributors_title">Contributors</string>
+    <string name="about_card_contributors_desc">The people behind the project</string>
     <string name="overlay_open">Restart Overlay</string>
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
@@ -308,6 +319,7 @@
     <string name="termux_launcher_title">Terminal on home screen</string>
     <string name="termux_launcher_desc">Show the Terminal icon in the launcher; turn off to hide it</string>
     <string name="termux_launcher_hidden">Hidden from home screen</string>
+    <string name="termux_launcher_disabled">Terminal entry is turned off</string>
     <string name="termux_session_name">Session %1$d</string>
     <string name="termux_menu_new_session">New session</string>
     <string name="termux_menu_close_session">Close session</string>
@@ -334,4 +346,6 @@
     <string name="paste_text">Paste</string>
     <string name="text_selection_more">More…</string>
     <string name="title_activity_about2">AboutActivity2</string>
+    <string name="pref_slider_title">Demo slider</string>
+    <string name="pref_slider_summary">Drag the handle to change the value</string>
 </resources>

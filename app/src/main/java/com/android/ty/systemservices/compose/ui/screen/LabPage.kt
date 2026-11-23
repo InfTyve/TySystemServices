@@ -3,7 +3,7 @@ package com.android.ty.systemservices.compose.ui.screen
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
+import com.android.ty.systemservices.compose.ui.widget.AdaptiveContentGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Settings
@@ -47,11 +47,10 @@ fun LabPageContent() {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) { padding ->
-        LazyColumn(
+        AdaptiveContentGrid(
             modifier = Modifier
                 .fillMaxSize()
                 .nestedScroll(rememberNestedScrollInteropConnection()),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         ) {
             item {
                 InfoTipCard(stringResource(R.string.tip_lab))
