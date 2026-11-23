@@ -3,7 +3,7 @@ package com.android.ty.systemservices.compose.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
+import com.android.ty.systemservices.compose.ui.widget.AdaptiveContentGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Visibility
@@ -63,13 +63,12 @@ fun DevScreen() {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) { padding ->
-        LazyColumn(
+        AdaptiveContentGrid(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 // 与 CollapsingToolbar 的 AppBar 联动
                 .nestedScroll(rememberNestedScrollInteropConnection()),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         ) {
             if (!hasPermission) {
                 item {

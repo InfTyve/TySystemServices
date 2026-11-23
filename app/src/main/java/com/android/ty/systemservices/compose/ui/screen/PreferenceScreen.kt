@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import com.android.ty.systemservices.compose.ui.widget.AdaptiveContentGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryFull
@@ -74,11 +74,11 @@ fun PreferenceScreen() {
             )
         },
     ) { padding ->
-        LazyColumn(
+        // 竖屏单列、横屏自动分栏；列数由可用宽度算出，不按方向硬编码
+        AdaptiveContentGrid(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         ) {
             item {
                 com.android.ty.systemservices.compose.ui.widget.StatusCard(

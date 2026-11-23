@@ -3,6 +3,7 @@ package com.android.ty.systemservices
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
@@ -11,11 +12,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,6 +47,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
@@ -62,6 +66,9 @@ import com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveIconCar
 
 /** Logo 高度：字标要在这个尺寸下仍能看清，再小就退回到「图标」观感了 */
 private val LogoHeight = 136.dp
+
+/** 横屏 Logo 高度：竖屏一半的可用高度下，136dp 会把首屏占满 */
+private val CompactLogoHeight = 96.dp
 
 /** 矢量本身的宽高比（viewport 813x856），固定高度后按它算宽度，避免被 contentScale 二次缩放 */
 private const val LogoAspectRatio = 813f / 856f
@@ -162,96 +169,156 @@ private fun runCardAction(context: Context, action: AboutCardAction) {
 fun AboutScreen(
     projectUrl: String = PROJECT_URL,
 ) {
-    val context = LocalContext.current
+    val isLandscape =
+        LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .nestedScroll(rememberNestedScrollInteropConnection()),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-    ) {
-        item {
-            LogoHeader(
+    if (isLandscape) {
+        // 横屏两栏：左侧「我是谁 / 去哪」，右侧「能做什么」。
+        // 两栏各自可滚动，避免左栏内容长时把右栏顶出屏幕。
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-            )
-        }
-        item {
-            // 外层已经有 16dp 的 contentPadding，这里用 noPadding 让卡片和上下两张对齐，
-            // 只留纵向间距
-            InfoTipCard(
-                text = stringResource(R.string.teyun_studio),
-                modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
-                noPadding = true,
-            )
-        }
-        item {
-            SegmentedColumn(title = stringResource(id = R.string.space)) {
-                item {
-                    NavigationItemWidget(
-                        icon = Icons.Filled.Construction,
-                        title = stringResource(R.string.contributors_title),
-                        description = stringResource(R.string.contributor_role_maintainer),
-                        onClick = {
-                            val intent = Intent(context, ContributorsActivity::class.java)
-                            context.startActivity(intent)
-                        },
-                    )
-                }
-                item {
-                    NavigationItemWidget(
-                        icon = Icons.Filled.Code,
-                        title = stringResource(R.string.tysystem_project),
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(projectUrl))
-                            try {
-                                context.startActivity(intent)
-                            } catch (_: ActivityNotFoundException) {
-                                // 没有浏览器/能处理 http 的应用，给个提示而不是静默失败
-                                Toast.makeText(
-                                    context,
-                                    R.string.link_open_failed,
-                                    Toast.LENGTH_SHORT,
-                                ).show()
-                            }
-                        },
-                    )
-                }
+                    .weight(0.44f)
+                    .fillMaxHeight()
+                    .nestedScroll(rememberNestedScrollInteropConnection()),
+                contentPadding = PaddingValues(vertical = 8.dp),
+            ) {
+                item { LogoSection(compact = true) }
+                item { InfoSection() }
+                item { NavSection(projectUrl) }
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .weight(0.56f)
+                    .fillMaxHeight()
+                    .nestedScroll(rememberNestedScrollInteropConnection()),
+                contentPadding = PaddingValues(vertical = 8.dp),
+            ) {
+                item { CardSection() }
             }
         }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .nestedScroll(rememberNestedScrollInteropConnection()),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            item { LogoSection(compact = false) }
+            item { InfoSection() }
+            item { NavSection(projectUrl) }
+            item { CardSection() }
+        }
+    }
+}
+
+/** Logo 卡片；横屏传 [compact] 让字标变矮，给下面的内容留高度 */
+@Composable
+private fun LogoSection(compact: Boolean) {
+    LogoHeader(
+        compact = compact,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
+    )
+}
+
+/** 一句话介绍；外层已经有 contentPadding，这里用 noPadding 让卡片和上下两张对齐 */
+@Composable
+private fun InfoSection() {
+    InfoTipCard(
+        text = stringResource(R.string.teyun_studio),
+        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+        noPadding = true,
+    )
+}
+
+/** 「空间」分组：贡献者 + 项目主页 */
+@Composable
+private fun NavSection(projectUrl: String) {
+    val context = LocalContext.current
+    SegmentedColumn(title = stringResource(id = R.string.space)) {
         item {
-            AboutCardGrid(
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+            NavigationItemWidget(
+                icon = Icons.Filled.Construction,
+                title = stringResource(R.string.contributors_title),
+                description = stringResource(R.string.contributor_role_maintainer),
+                onClick = {
+                    val intent = Intent(context, ContributorsActivity::class.java)
+                    context.startActivity(intent)
+                },
+            )
+        }
+        item {
+            NavigationItemWidget(
+                icon = Icons.Filled.Code,
+                title = stringResource(R.string.tysystem_project),
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(projectUrl))
+                    try {
+                        context.startActivity(intent)
+                    } catch (_: ActivityNotFoundException) {
+                        // 没有浏览器/能处理 http 的应用，给个提示而不是静默失败
+                        Toast.makeText(
+                            context,
+                            R.string.link_open_failed,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                },
             )
         }
     }
 }
 
+/** 功能卡片区 */
+@Composable
+private fun CardSection() {
+    AboutCardGrid(
+        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+    )
+}
+
 /**
- * 双列功能卡片网格。
+ * 功能卡片网格。
  *
  * 没用 LazyVerticalGrid：它不能和同方向的 LazyColumn 嵌套（会崩），
  * 卡片数量固定，chunked 成若干 Row 更省事。
+ *
+ * 列数按**可用宽度**决定而不是按方向硬编码，横屏手机、平板、折叠屏展开都能拿到合适的密度：
+ * < 600dp 两列（竖屏手机）、600~840dp 三列、>= 840dp 四列（横屏手机/平板一行放完）。
  */
 @Composable
 private fun AboutCardGrid(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        aboutCards.chunked(2).forEach { rowCards ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                rowCards.forEach { card ->
-                    AboutCardItem(card = card, modifier = Modifier.weight(1f))
-                }
-                // 奇数个时补一个空位，避免最后一张被拉伸成整行
-                if (rowCards.size == 1) {
-                    Spacer(Modifier.weight(1f))
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val columns = when {
+            maxWidth >= 840.dp -> 4
+            maxWidth >= 600.dp -> 3
+            else -> 2
+        }
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            aboutCards.chunked(columns).forEach { rowCards ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    rowCards.forEach { card ->
+                        AboutCardItem(card = card, modifier = Modifier.weight(1f))
+                    }
+                    // 不足一行时补空位，避免最后一张被拉伸成整行
+                    repeat(columns - rowCards.size) {
+                        Spacer(Modifier.weight(1f))
+                    }
                 }
             }
         }
@@ -350,13 +417,18 @@ private fun AboutCardItem(
  * 矢量本身是纯黑描边，这里统一 tint 成 onSurface，深色主题下才不会看不见。
  */
 @Composable
-private fun LogoHeader(modifier: Modifier = Modifier) {
+private fun LogoHeader(
+    compact: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val colors = MaterialTheme.colorScheme
+    // 横屏可用高度只有一半，136dp 的字标会吃掉首屏，缩到 96dp
+    val logoHeight = if (compact) CompactLogoHeight else LogoHeight
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(CornerRadius))
             .background(colors.surfaceBright)
-            .padding(vertical = 28.dp),
+            .padding(vertical = if (compact) 16.dp else 28.dp),
         contentAlignment = Alignment.Center,
     ) {
         Image(
@@ -365,7 +437,7 @@ private fun LogoHeader(modifier: Modifier = Modifier) {
             contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(colors.onSurface),
             modifier = Modifier
-                .height(LogoHeight)
+                .height(logoHeight)
                 .aspectRatio(LogoAspectRatio),
         )
     }

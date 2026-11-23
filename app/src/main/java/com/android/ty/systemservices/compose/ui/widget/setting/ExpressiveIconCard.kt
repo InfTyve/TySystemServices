@@ -28,16 +28,6 @@ import androidx.compose.ui.unit.dp
  *
  * 所有「有底的图标」都从这里取色，改一处就是全局改：
  * 返回按钮、工具栏动作按钮、About 功能卡片的图标块。
- ExpressiveIconCard(
-    modifier = ...,
-    size = 48.dp,                    // 容器边长
-    shape = CircleShape,             // 圆形；About 传 RoundedCornerShape(14.dp)
-    containerColor = ExpressiveCardDefaults.containerColor(),  // surfaceContainerHighest 60%
-    contentColor = ExpressiveCardDefaults.contentColor(),
-    enabled = true,
-    onClick = { ... },               // 传了就是按钮，不传就是纯装饰块
- ) { Icon(...) }
-
  */
 object ExpressiveCardDefaults {
 

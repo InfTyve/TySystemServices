@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import com.android.ty.systemservices.compose.ui.widget.AdaptiveContentGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Settings
@@ -121,12 +121,11 @@ fun TestScreen(onBack: () -> Unit = {}) {
             )
         },
     ) { padding ->
-        LazyColumn(
+        AdaptiveContentGrid(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalSpacing = 16.dp,
         ) {
             item {
                 SegmentedColumn(title = stringResource(R.string.test_section_all_enabled)) {

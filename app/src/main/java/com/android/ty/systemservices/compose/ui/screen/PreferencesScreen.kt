@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import com.android.ty.systemservices.compose.ui.widget.AdaptiveContentGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -128,14 +128,14 @@ fun PreferencesScreen() {
     }
 
     // 主页大标题头部由 MingActivity 的 CollapsingToolbarBaseActivity 承载，
-    // 这里不再包 Scaffold/TopAppBar；LazyColumn 必须带 nestedScroll 才能联动 AppBar 折叠。
+    // 这里不再包 Scaffold/TopAppBar；网格必须带 nestedScroll 才能联动 AppBar 折叠。
+    // AdaptiveContentGrid 在竖屏是单列（和原 LazyColumn 一致），横屏自动分栏。
     Box(modifier = Modifier.fillMaxSize()) {
-    LazyColumn(
+    AdaptiveContentGrid(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .nestedScroll(rememberNestedScrollInteropConnection()),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
     ) {
             item {
                 StatusCard(

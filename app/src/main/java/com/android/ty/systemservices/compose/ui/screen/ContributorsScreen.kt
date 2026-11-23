@@ -11,7 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import com.android.ty.systemservices.compose.ui.widget.AdaptiveContentGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -103,15 +104,14 @@ fun ContributorsScreen() {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) { padding ->
-        LazyColumn(
+        AdaptiveContentGrid(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 // 与 CollapsingToolbar 的 AppBar 联动
                 .nestedScroll(rememberNestedScrollInteropConnection())
                 .padding(padding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalSpacing = 16.dp,
         ) {
             items(contributors) { contributor ->
                 // stringResource 只能在 composable 作用域里取，先取出来再交给点击回调
