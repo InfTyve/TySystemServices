@@ -5,12 +5,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,6 +27,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
@@ -35,7 +39,7 @@ enum class LargeTitleMode {
     /** 标题连续缩小并平移到顶栏标题位置（原 TITLE_COLLAPSE_MODE_SCALE） */
     SCALE,
 
-    /** 位置同样连续，但缩小集中在前半程之后，整体更「稳」一点（原 TITLE_COLLAPSE_MODE_FADE） */
+    /** 完全复刻原 `TITLE_COLLAPSE_MODE_FADE`：随滚动上移并按 Material 的曲线淡出 */
     FADE,
 }
 
@@ -60,10 +64,27 @@ private const val LineHeightFactor = 1.18f
 /** 顶栏标题左边界：Row 起点 8 + 返回按钮 48 + 间隔 4 + 文字内边距 4 */
 private val CollapsedTitleStart = BackButtonInset + BackButtonSize + 8.dp
 
-/** 0..1 的 Hermite 平滑过渡，用于淡入淡出，避免线性透明度变化的生硬感 */
-private fun smoothstep(edge0: Float, edge1: Float, x: Float): Float {
-    val t = ((x - edge0) / (edge1 - edge0)).coerceIn(0f, 1f)
-    return t * t * (3f - 2f * t)
+/**
+ * Material `CollapsingTextHelper.FADE_MODE_THRESHOLD_FRACTION_RELATIVE`。
+ *
+ * 交接点按「剩余可折叠行程的一半」取，和原版完全一致：
+ * `threshold = start + (1 - start) * 0.5`。
+ */
+private const val FadeThresholdRelative = 0.5f
+
+/**
+ * 原版 `CollapsingTextHelper.calculateFadeModeTextAlpha()` 的逐行移植。
+ *
+ * 在 [start] 之前保持全亮；[start]~[threshold] 线性淡到 0；
+ * 之后不再绘制大标题（顶栏那行小标题接管）。
+ * 注意这里是**分段线性**而不是 smoothstep——原版用的就是
+ * `AnimationUtils.lerp(value, startFraction, endFraction)`，没有缓动。
+ */
+private fun fadeModeAlpha(progress: Float, start: Float, threshold: Float): Float = when {
+    progress <= start -> 1f
+    progress <= threshold ->
+        1f - (progress - start) / (threshold - start).coerceAtLeast(1e-4f)
+    else -> 0f
 }
 
 /**
@@ -73,11 +94,15 @@ private fun smoothstep(edge0: Float, edge1: Float, x: Float): Float {
  * 之前是「大标题滑上去淡出 + 顶栏标题淡入」两套坐标系各画一份，
  * 中间还夹一层背景去遮挡，观感就是「先消失、再出现」，不是滑到顶部。
  *
- * 现在整段折叠只绘制**一个** Text：位置、字号都由 [fraction] 连续插值，
- * 从「头部左下角」一路滑到「顶栏返回按钮右侧」，不会滑到一半停住。
- * SCALE 档收尾时它自己就是顶栏标题（全程不透明）；
- * FADE 档保持原语义——边滑边渐隐，最后交给顶栏那行小标题，
- * 两段是叠着过渡的，不会像之前那样「先整个消失、再冒出另一个」。
+ * 两档共用同一个 Text，但折叠曲线各自对照原版实现：
+ *
+ * - **SCALE**：位置、字号连续插值，从「头部左下角」一路滑到「顶栏返回按钮右侧」，
+ *   全程不透明，收尾时它自己就是顶栏标题；
+ * - **FADE**：照搬 `CollapsingToolbarLayout.TITLE_COLLAPSE_MODE_FADE` 的
+ *   分段参数（`fadeStart` / `fadeThreshold` 和分段线性 alpha）。标题不做额外位移，
+ *   由 AppBarLayout 的滚动把它推上去，边推边按原曲线淡出，
+ *   到 `fadeThreshold` 时 alpha 正好为 0，再把顶栏那行小标题淡进来。
+ *   因为切换发生在完全透明的瞬间，看不出「啪」地跳位置。
  *
  * ## 坐标说明
  * Compose 画在 AppBarLayout 内部，而 AppBarLayout 折叠时整块上移 [pinnedOffset]。
@@ -126,11 +151,25 @@ fun LargeTitleHeader(
         val pinnedOffset = (maxHeight - CollapsedBarHeight) * progress
 
         val isFade = mode == LargeTitleMode.FADE
-        // FADE 档：大标题边滑边淡出（「渐变消失」），顶栏标题延后一点再淡入，避免重影
-        val expandedAlpha =
-            if (isFade) 1f - smoothstep(0.45f, 1f, progress) else 1f
-        val collapsedAlpha =
-            if (isFade) smoothstep(0.52f, 1f, progress) else 0f
+
+        // ---------------- FADE：原版 CollapsingToolbarLayout 的淡出参数 ----------------
+        // 原版在 onOffsetChanged 里算这两个区间：
+        //   expandRange = height - minHeight - insetTop
+        //   scrimRange  = height - min(2 * minHeight + insetTop, height)
+        //   start       = min(1, scrimRange / expandRange)
+        //   threshold   = start + (1 - start) * 0.5
+        val insetTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+        val expandRange = maxHeight - CollapsedBarHeight - insetTop
+        val scrimTrigger = minOf(CollapsedBarHeight * 2 + insetTop, maxHeight)
+        val scrimRange = maxHeight - scrimTrigger
+        val fadeStart =
+            if (expandRange > 0.dp) (scrimRange / expandRange).coerceIn(0f, 1f) else 0f
+        val fadeThreshold = fadeStart + (1f - fadeStart) * FadeThresholdRelative
+
+        val expandedAlpha = if (isFade) fadeModeAlpha(progress, fadeStart, fadeThreshold) else 1f
+        val collapsedAlpha = if (!isFade) 0f else
+            ((progress - fadeThreshold) / (1f - fadeThreshold).coerceAtLeast(1e-4f))
+                .coerceIn(0f, 1f)
 
         // ---------------- 折叠态顶栏（背景 + 返回按钮 + 标题 + 菜单） ----------------
         Row(
@@ -171,31 +210,39 @@ fun LargeTitleHeader(
         }
 
         // ---------------- 唯一的大标题 ----------------
-        // 两档位置插值完全一致，区别只在终点大小和是否淡出：
-        // SCALE 线性缩到 0.68（≈22sp，正好等于顶栏标题）并保持不透明；
-        // FADE 缩到 0.78 的同时渐隐到 0，收尾交给顶栏那行小标题。
-        val endScale = if (isFade) 0.78f else 0.68f
-        val scale = 1f - (1f - endScale) * progress
+        val scale: Float
+        val left: Dp
+        val topInternal: Dp
+        val maxTextWidth: Dp
 
-        // 视觉高度（缩放后的实际占位高度），用于把「视觉中心」对齐到顶栏中线
-        val visualHeight = lineHeight * scale
+        if (isFade) {
+            // 原版 fade 档不做位置插值：标题钉在布局内的展开位置，
+            // 由 AppBarLayout 的滚动把它推上去，同时按上面的曲线淡出——
+            // 「滑到顶部」和「渐变消失」因此是同一个动作，不会划到一半停住。
+            scale = 1f
+            left = TitleInset
+            topInternal = maxHeight - TitleInset - lineHeight
+            maxTextWidth = maxWidth - TitleInset * 2
+        } else {
+            // SCALE 档：位置 + 字号连续插值，终点正好落在顶栏标题那一格
+            scale = 1f - 0.32f * progress
+            val visualHeight = lineHeight * scale
+            val startBottom = maxHeight - TitleInset
+            val endBottom = CollapsedBarHeight / 2 + visualHeight / 2
+            val screenBottom = lerp(startBottom, endBottom, progress)
+            // 屏幕坐标 → AppBarLayout 内部坐标
+            topInternal = screenBottom + pinnedOffset - lineHeight
 
-        // 纵坐标插值：底边从「离头部底 24dp」滑到「顶栏垂直居中」
-        val startBottom = maxHeight - TitleInset
-        val endBottom = CollapsedBarHeight / 2 + visualHeight / 2
-        val screenBottom = lerp(startBottom, endBottom, progress)
-        // 屏幕坐标 → AppBarLayout 内部坐标
-        val topInternal = screenBottom + pinnedOffset - lineHeight
-
-        // 横坐标插值：用 ease-out 提前完成，上升段开始时已经在返回按钮右侧，不会重合
-        val slide = 1f - (1f - progress) * (1f - progress)
-        val endX = if (backVisible) CollapsedTitleStart else 16.dp
-        val left = lerp(TitleInset, endX, slide)
+            // 横坐标用 ease-out 提前完成，上升段开始时已在返回按钮右侧，不会重合
+            val slide = 1f - (1f - progress) * (1f - progress)
+            val endX = if (backVisible) CollapsedTitleStart else 16.dp
+            left = lerp(TitleInset, endX, slide)
+            // 布局宽度随进度收缩：展开态保留旧版 24dp 双边距，收起态给右侧菜单让位
+            maxTextWidth = maxWidth - lerp(TitleInset * 2, endX + 56.dp, slide)
+        }
 
         val leftPx = with(density) { left.toPx() }
         val topPx = with(density) { topInternal.toPx() }
-        // 布局宽度随进度收缩：展开态保留旧版的 24dp 双边距，收起态给右侧菜单让位
-        val maxTextWidth = maxWidth - lerp(TitleInset * 2, endX + 56.dp, slide)
 
         Box(
             modifier = Modifier
