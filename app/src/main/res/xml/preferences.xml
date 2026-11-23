@@ -53,6 +53,19 @@
             android:entries="@array/lll"
             android:entryValues="@array/lll"
             android:defaultValue="001" />
+
+        <!-- 滑杆：Material 3 Expressive 外观，取值 0~100、步长 10、单位 % -->
+        <com.android.ty.systemservices.compose.ui.preference.ComposeSliderPreference
+            android:key="demo_slider"
+            android:title="@string/pref_slider_title"
+            android:summary="@string/pref_slider_summary"
+            android:defaultValue="40"
+            app:iconDrawable="@drawable/ic_settings_24dp"
+            app:sliderMax="100"
+            app:sliderMin="0"
+            app:sliderStep="10"
+            app:sliderValueSuffix="%"
+            android:persistent="true" />
         <com.android.ty.systemservices.compose.ui.preference.ComposePreference
             android:key="about"
             android:title="@string/pref_about_title"
