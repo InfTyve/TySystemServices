@@ -58,6 +58,7 @@ import com.android.ty.systemservices.compose.ui.theme.CornerRadius
 import com.android.ty.systemservices.compose.ui.widget.InfoTipCard
 import com.android.ty.systemservices.compose.ui.widget.NavigationItemWidget
 import com.android.ty.systemservices.compose.ui.widget.SegmentedColumn
+import com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveIconCard
 
 /** Logo 高度：字标要在这个尺寸下仍能看清，再小就退回到「图标」观感了 */
 private val LogoHeight = 136.dp
@@ -304,13 +305,13 @@ private fun AboutCardItem(
                 .height(148.dp)
                 .padding(16.dp),
         ) {
-            // 图标块：浅色底 + 容器色图标，和参考图一致
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(colors.surface.copy(alpha = 0.85f)),
-                contentAlignment = Alignment.Center,
+            // 图标块：和返回按钮、工具栏动作按钮共用同一张「卡片」，
+            // 只是形状从圆形换成 14dp 圆角、底色换成卡片内的浅色层
+            ExpressiveIconCard(
+                size = 44.dp,
+                shape = RoundedCornerShape(14.dp),
+                containerColor = colors.surface.copy(alpha = 0.85f),
+                contentColor = content,
             ) {
                 Icon(
                     imageVector = card.icon,
