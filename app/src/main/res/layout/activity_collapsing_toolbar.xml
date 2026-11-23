@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 大标题基类布局：头部浮在上方，内容放进 content_frame -->
+<!--
+    大标题基类布局（Two：FADE 折叠）：
+    头部整块由 Compose 绘制（header_compose），这里只保留滚动物理。
+
+    minHeight = 折叠后剩下的顶栏高度：AppBarLayout 的 getTotalScrollRange()
+    会把子 View 的 minimumHeight 减掉，所以收起后恰好剩 56dp，不依赖 CollapsingToolbarLayout。
+-->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -14,44 +20,16 @@
         android:background="@color/background"
         android:fitsSystemWindows="true">
 
-        <com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveCollapsingToolbarLayout_Two
-            android:id="@+id/collapsing_toolbar"
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/header_compose"
             android:layout_width="match_parent"
             android:layout_height="160dp"
-            android:fitsSystemWindows="true"
-            app:contentScrim="@color/background"
-            app:expandedTitleGravity="bottom|start"
-            app:expandedTitleMarginStart="24dp"
-            app:expandedTitleMarginBottom="24dp"
-            app:collapsedTitleGravity="start"
-            app:collapsedTitleTextColor="@color/on_background"
-            app:expandedTitleTextColor="@color/on_background"
-            app:expandedTitleTextAppearance="@style/CollapsingToolbarSampleLargeTitle"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            android:minHeight="56dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed" />
 
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/action_bar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@android:color/transparent"
-                android:theme="@style/ThemeOverlay.MaterialComponents.Light"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light">
-
-                <!-- ExpressiveBackButton 承载容器：Toolbar 起始位置，覆盖系统返回箭头 -->
-                <androidx.compose.ui.platform.ComposeView
-                    android:id="@+id/back_button_container"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_gravity="start|center_vertical"
-                    android:layout_marginStart="4dp" />
-
-            </androidx.appcompat.widget.Toolbar>
-
-        </com.android.ty.systemservices.compose.ui.widget.setting.ExpressiveCollapsingToolbarLayout_Two>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- 内容真正放这里（首页会替换成一个 PreferenceFragment） -->
+    <!-- 内容真正放这里（首页会替换成一个 Fragment 或 ComposeView） -->
     <FrameLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"

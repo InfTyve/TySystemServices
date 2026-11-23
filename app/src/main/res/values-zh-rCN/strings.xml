@@ -28,6 +28,16 @@
     <string name="stop_status_title">禁止下拉状态栏</string>
     <string name="stop_status_summary">屏蔽通知栏与快捷设置的下拉手势，重启后自动恢复</string>
     <string name="tysystem_project">项目</string>
+    <string name="link_open_failed">没有可以打开这个链接的应用</string>
+    <!-- AboutScreen 功能卡片（占位，可随意替换） -->
+    <string name="about_card_terminal_title">终端</string>
+    <string name="about_card_terminal_desc">内嵌交互式终端</string>
+    <string name="about_card_aod_title">熄屏显示</string>
+    <string name="about_card_aod_desc">Doze 布局与点击唤醒</string>
+    <string name="about_card_security_title">安全</string>
+    <string name="about_card_security_desc">Doze 与锁屏相关开关</string>
+    <string name="about_card_contributors_title">贡献者</string>
+    <string name="about_card_contributors_desc">项目背后的名单</string>
     <string name="audio_control_title">音频控制</string>
     <string name="audio_control_summary">写入 Settings.Global 的 audio_control：开启为 1，关闭为 0</string>
     <!-- Settings.Global Butter_set -->
@@ -269,6 +279,7 @@
     <string name="termux_launcher_title">桌面显示终端入口</string>
     <string name="termux_launcher_desc">在桌面显示 Terminal 图标，关闭则隐藏</string>
     <string name="termux_launcher_hidden">已从桌面隐藏</string>
+    <string name="termux_launcher_disabled">终端桌面入口已关闭</string>
     <string name="termux_session_name">会话 %1$d</string>
     <string name="termux_menu_new_session">新建会话</string>
     <string name="termux_menu_close_session">关闭会话</string>

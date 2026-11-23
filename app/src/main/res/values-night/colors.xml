@@ -9,7 +9,10 @@
     <color name="primary_container">#D3E3FD</color>
     <color name="on_primary_container">#041E49</color>
     <color name="secondary">#3D5AFE</color>
-    <color name="background">#FF000000</color>
+    <!-- 与 TyTheme 的 colorScheme.background 保持一致（0xFF131318），
+         否则 AppBarLayout 因 fitsSystemWindows 露出的状态栏 padding 区会是纯黑，
+         展开态顶部就出现一条和 Compose 头部不同色的黑边 -->
+    <color name="background">#FF131318</color>
     <color name="on_background">#FFFFFF</color>
     <color name="surface">#FFFBFE</color>
     <color name="on_surface">#1C1B1F</color>
