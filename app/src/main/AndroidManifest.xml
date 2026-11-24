@@ -142,7 +142,7 @@
             android:name=".TopLevelDevTyActivity"
             android:enabled="true"
             android:exported="true"
-            android:targetActivity=".MingActivity">
+            android:targetActivity=".compose.MingActivity">
             <intent-filter>
                 <action android:name="com.android.settings.action.IA_SETTINGS" />
 
