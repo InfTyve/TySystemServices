@@ -111,6 +111,60 @@
                 android:name="com.android.settings.order"
                 android:value="190" />
         </activity-alias>
+        <activity-alias
+            android:name=".TopLevelAboutInfoActivity"
+            android:enabled="true"
+            android:exported="true"
+            android:targetActivity=".AboutActivity">
+            <intent-filter>
+                <action android:name="com.android.settings.action.IA_SETTINGS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="com.android.settings.category"
+                android:value="com.android.settings.category.ia.my_device_info" />
+            <meta-data
+                android:name="com.android.settings.title"
+                android:resource="@string/about_info_title" />
+            <meta-data
+                android:name="com.android.settings.summary"
+                android:resource="@string/about_info_summary" />
+            <meta-data
+                android:name="com.android.settings.icon"
+                android:resource="@drawable/code42" />
+            <meta-data
+                android:name="com.android.settings.order"
+                android:value="42" />
+        </activity-alias>
+        <activity-alias
+            android:name=".TopLevelDevTyActivity"
+            android:enabled="true"
+            android:exported="true"
+            android:targetActivity=".compose.MingActivity">
+            <intent-filter>
+                <action android:name="com.android.settings.action.IA_SETTINGS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="com.android.settings.category"
+                android:value="com.android.settings.category.ia.development" />
+            <meta-data
+                android:name="com.android.settings.title"
+                android:resource="@string/app_title" />
+            <meta-data
+                android:name="com.android.settings.summary"
+                android:resource="@string/summary" />
+            <meta-data
+                android:name="com.android.settings.icon"
+                android:resource="@drawable/code42" />
+            <meta-data
+                android:name="com.android.settings.order"
+                android:value="-114" />
+        </activity-alias>
 
         <!-- 安全设置：Settings.Secure 的 doze 开关，仅应用内跳转 -->
         <activity

@@ -348,4 +348,6 @@
     <string name="title_activity_about2">AboutActivity2</string>
     <string name="pref_slider_title">Demo slider</string>
     <string name="pref_slider_summary">Drag the handle to change the value</string>
+    <string name="about_info_title">About TeYun</string>
+    <string name="about_info_summary">System Developer</string>
 </resources>
