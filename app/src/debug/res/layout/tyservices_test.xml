@@ -40,6 +40,11 @@
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:text="OpenDevActivity"/>
+                
+        <Switch android:id="@+id/test_back"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:text="BackButtonDisplay"/>
 
     </LinearLayout>
 </ScrollView>

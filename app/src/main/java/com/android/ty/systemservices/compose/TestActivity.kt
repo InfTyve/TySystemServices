@@ -3,6 +3,7 @@ package com.android.ty.systemservices.compose
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import com.android.ty.systemservices.CollapsingToolbarBaseActivity
 import com.android.ty.systemservices.compose.ui.screen.TestScreen
 import com.android.ty.systemservices.compose.ui.theme.TyTheme
 
@@ -12,9 +13,15 @@ import com.android.ty.systemservices.compose.ui.theme.TyTheme
 class TestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 调试开关：debug 包里由 OpenTestActivity 通过 extra 关闭返回按钮；
+        // release 里没人传这个 extra，行为与原来完全一致。
+        val hideBack = intent.getBooleanExtra(
+            CollapsingToolbarBaseActivity.EXTRA_DEBUG_HIDE_BACK_BUTTON,
+            false,
+        )
         setContent {
             TyTheme {
-                TestScreen(onBack = { finish() })
+                TestScreen(onBack = { finish() }, showBack = !hideBack)
             }
         }
     }

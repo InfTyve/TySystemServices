@@ -100,7 +100,7 @@ private val disabledDemo = SettingsItem(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TestScreen(onBack: () -> Unit = {}) {
+fun TestScreen(onBack: () -> Unit = {}, showBack: Boolean = true) {
     var wifi by rememberSaveable { mutableStateOf(true) }
     var volume by rememberSaveable { mutableIntStateOf(40) }
     val defaultName = LocalContext.current.getString(R.string.demo_device_name)
@@ -114,7 +114,10 @@ fun TestScreen(onBack: () -> Unit = {}) {
         topBar = {
             TopAppBar(
                 title = { Text(text = stringResource(R.string.test_screen_title)) },
-                navigationIcon = { ExpressiveBackButton(onClick = onBack) },
+                navigationIcon = {
+                    // showBack 为 false 时整个槽位留空（调试用的返回按钮开关）
+                    if (showBack) ExpressiveBackButton(onClick = onBack)
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 ),

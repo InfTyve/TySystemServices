@@ -1,5 +1,6 @@
 package com.android.ty.systemservices
 
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import android.util.Xml
 import android.view.Gravity
@@ -217,11 +218,24 @@ abstract class CollapsingToolbarBaseActivity(
      * ORIGINAL 档（没有 Compose 头部）回退到系统返回箭头。
      */
     fun setBackButton(visible: Boolean) {
+        val effective = if (isBackButtonDebugHidden()) false else visible
         if (headerCompose != null) {
-            headerBack.value = visible
+            headerBack.value = effective
         } else {
-            supportActionBar?.setDisplayHomeAsUpEnabled(visible)
+            supportActionBar?.setDisplayHomeAsUpEnabled(effective)
         }
+    }
+
+    /**
+     * 调试开关：Intent 里带 [EXTRA_DEBUG_HIDE_BACK_BUTTON] 时强制不显示返回按钮。
+     *
+     * 只在 debug 包里成立——release 的 `ApplicationInfo.FLAG_DEBUGGABLE` 恒为 0，
+     * 这里第一步就短路返回 false，既不会去读 Intent，也不影响原版返回按钮的判定。
+     */
+    private fun isBackButtonDebugHidden(): Boolean {
+        val debuggable = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+        if (!debuggable) return false
+        return intent.getBooleanExtra(EXTRA_DEBUG_HIDE_BACK_BUTTON, false)
     }
 
     /** 主动展开 / 收起头部（Android 12 顶层页跳二级页时收起） */
@@ -384,4 +398,15 @@ abstract class CollapsingToolbarBaseActivity(
         val layoutRes: Int,
         val mode: LargeTitleMode?,
     )
+
+    companion object {
+        /**
+         * 调试用 extra：`true` 表示强制隐藏返回按钮。
+         *
+         * 仅 debug 构建会读取（见 [isBackButtonDebugHidden]），
+         * debug 源集里的 `OpenTestActivity` 用它做开关验证。
+         */
+        const val EXTRA_DEBUG_HIDE_BACK_BUTTON =
+            "com.android.ty.systemservices.extra.DEBUG_HIDE_BACK_BUTTON"
+    }
 }
