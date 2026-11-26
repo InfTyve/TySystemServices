@@ -10,6 +10,7 @@ import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.os.Process
 import android.provider.Settings
 import android.util.Log
 import android.util.TypedValue
@@ -135,7 +136,8 @@ object TestModeOverlay {
         val listener = AppOpsManager.OnOpChangedListener { _, _ ->
             handler.post {
                 if (!isEnabled(context)) return@post
-                // 窗口可能已被系统摘掉，本地列表里的引用是脏的，先清空再重建
+                // 系统可能已经摘掉窗口，本地列表里的引用是脏的，先清空再重建；
+                // 顺手把 appop 置回 allowed，防止设置页开关与实际状态反复横跳
                 hide(context)
                 show(context)
             }
@@ -181,6 +183,57 @@ object TestModeOverlay {
             PackageManager.PERMISSION_GRANTED
 
     /**
+     * 把自己的 SYSTEM_ALERT_WINDOW appop 直接置回 allowed。
+     *
+     * 应用以 `android.uid.system` 运行时，AppOpsManager 允许系统 uid 修改任何包
+     * 的模式——这正对应「完全由 system 驱动」：用户在设置里关掉开关，
+     * 这里马上改回 allowed，WMS 也就不会摘走浮层，设置页的开关同时回到开启态。
+     * 没有系统 uid 的普通环境这条调用会抛 SecurityException，忽略并回退到原语义。
+     */
+    private fun ensureAppOpAllowed(context: Context) {
+        try {
+            val appOps = context.getSystemService(AppOpsManager::class.java) ?: return
+            // setMode 是 hidden API（SDK stub 里不可见），用反射调；
+            // 系统应用不受 hidden API 限制拦截，普通应用会抛异常走忽略分支
+            val setMode = AppOpsManager::class.java.getMethod(
+                "setMode",
+                String::class.java,
+                Int::class.javaPrimitiveType,
+                String::class.java,
+                Int::class.javaPrimitiveType,
+            )
+            setMode.invoke(
+                appOps,
+                AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW,
+                Process.myUid(),
+                context.packageName,
+                AppOpsManager.MODE_ALLOWED,
+            )
+        } catch (t: Throwable) {
+            Log.w(TAG, "force SYSTEM_ALERT_WINDOW appop failed", t)
+        }
+    }
+
+    /**
+     * 当前浮层的诊断信息，开发调试页直接展示。
+     *
+     * `views=2/2` 是实际挂载的窗口数；`type` 是下一次加窗用的层级；
+     * `sysPerm` 是系统私有窗口权限；`appop` 是「显示在其他应用上层」开关。
+     */
+    @JvmStatic
+    fun diagnostic(context: Context): String {
+        val app = context.applicationContext
+        return "views=${overlayViews.size}/$OVERLAY_COUNT" +
+            " type=${overlayWindowType(app)}" +
+            " sysPerm=${hasSystemWindowPermission(app)}" +
+            " appop=${if (Settings.canDrawOverlays(app)) "allowed" else "denied"}" +
+            " top=$topMostFlagAvailable"
+    }
+
+    /** 最高层标记在当前 ROM 上是否可用（常量存在即可，实际是否生效由 WMS 决定） */
+    private val topMostFlagAvailable: Boolean by lazy { topMostPrivateFlag != null }
+
+    /**
      * 选窗口类型：有系统权限就挂到系统层级（2003，高于状态栏），
      * 否则退回普通应用浮层（2038，需要 appop）。
      */
@@ -211,6 +264,10 @@ object TestModeOverlay {
         if (overlayViews.size >= OVERLAY_COUNT) return true
         if (overlayViews.isNotEmpty()) hide(context)
 
+        // 系统环境下直接把自己的 appop 置回 allowed：用户关掉「显示在其他应用上层」
+        // 后，系统不再有机会摘走浮层（普通应用会抛 SecurityException，忽略即回退原语义）
+        ensureAppOpAllowed(context)
+
         val wm = context.getSystemService(WindowManager::class.java) ?: return false
         val density = context.resources.displayMetrics.density
 
@@ -237,8 +294,15 @@ object TestModeOverlay {
                 gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
                 y = offsetY
             }
+            // 抬到 SystemUI 之上：通知面板展开时也要看得见
+            applyTopMostFlag(params)
             var added = tryAdd(wm, view, params, text)
-            // 系统层级被 ROM 拒掉（少数发行版会收紧 2003）时退回普通浮层，
+            // 个别 ROM 不认这个私有标记，清掉再试一次普通系统层级
+            if (!added) {
+                setPrivateFlags(params, 0)
+                added = tryAdd(wm, view, params, text)
+            }
+            // 系统层级被 ROM 拒掉时退回普通浮层，
             // 这样至少在有 appop 的机器上仍然能显示
             if (!added && preferredType != WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY) {
                 params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -250,6 +314,52 @@ object TestModeOverlay {
             }
         }
         return addedAny
+    }
+
+    /**
+     * 把窗口抬到所有窗口之上（含 SystemUI 的下拉通知面板）。
+     *
+     * `TYPE_SYSTEM_ALERT` 在 [android.view.WindowManagerPolicy] 的层级表里只排到第 9 层，
+     * 而 `TYPE_NOTIFICATION_SHADE` 排到第 17 层——单靠窗口类型永远压不住下拉面板。
+     *
+     * 这里打开系统应用专用的私有标记 `PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY`：
+     * WMS 见到该标记且调用方持有 `INTERNAL_SYSTEM_WINDOW` 时，
+     * 直接按 `getMaxWindowLayer()` 摆放，也就是最高层。
+     *
+     * @return 是否成功设置（常量取不到时返回 false，窗口仍按普通系统层级显示）
+     */
+    private fun applyTopMostFlag(params: WindowManager.LayoutParams): Boolean {
+        val flag = topMostPrivateFlag ?: return false
+        return setPrivateFlags(params, getPrivateFlags(params) or flag)
+    }
+
+    /** `privateFlags` 字段与常量都是 hidden，统一走反射 */
+    private fun getPrivateFlags(params: WindowManager.LayoutParams): Int = try {
+        WindowManager.LayoutParams::class.java.getField("privateFlags").getInt(params)
+    } catch (t: Throwable) {
+        0
+    }
+
+    private fun setPrivateFlags(params: WindowManager.LayoutParams, value: Int): Boolean = try {
+        WindowManager.LayoutParams::class.java
+            .getField("privateFlags")
+            .setInt(params, value)
+        true
+    } catch (t: Throwable) {
+        Log.w(TAG, "set privateFlags failed", t)
+        false
+    }
+
+    /** `PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY` 的值，取不到为 null */
+    private val topMostPrivateFlag: Int? by lazy {
+        try {
+            WindowManager.LayoutParams::class.java
+                .getField("PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY")
+                .getInt(null)
+        } catch (t: Throwable) {
+            Log.w(TAG, "PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY unavailable", t)
+            null
+        }
     }
 
     /** addView 的薄封装：失败只记日志，交给调用方决定是否回退 */

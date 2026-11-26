@@ -26,6 +26,16 @@
         android:name="android.permission.INTERNAL_SYSTEM_WINDOW"
         tools:ignore="ProtectedPermissions" />
 
+    <!--
+        自管 appop：signature，平台签名自动授予。
+        android.uid.system 的应用可以用 AppOpsManager.setMode 把自己的
+        SYSTEM_ALERT_WINDOW 模式置回 allowed——用户关掉「显示在其他应用上层」
+        后系统不再有机会摘走浮层。
+    -->
+    <uses-permission
+        android:name="android.permission.MANAGE_APP_OPS_MODES"
+        tools:ignore="ProtectedPermissions" />
+
     <!-- 熄屏显示轻触唤醒：FULL_WAKE_LOCK 走 PowerManagerService 的 wakeUp 路径 -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
