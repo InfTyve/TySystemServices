@@ -1,5 +1,6 @@
 package com.android.ty.systemservices
 
+import android.app.Activity
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import android.util.Xml
@@ -229,14 +230,9 @@ abstract class CollapsingToolbarBaseActivity(
     /**
      * 调试开关：Intent 里带 [EXTRA_DEBUG_HIDE_BACK_BUTTON] 时强制不显示返回按钮。
      *
-     * 只在 debug 包里成立——release 的 `ApplicationInfo.FLAG_DEBUGGABLE` 恒为 0，
-     * 这里第一步就短路返回 false，既不会去读 Intent，也不影响原版返回按钮的判定。
+     * 只在 debug 包里成立，具体判定见 [shouldHideBackButtonDebug]。
      */
-    private fun isBackButtonDebugHidden(): Boolean {
-        val debuggable = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
-        if (!debuggable) return false
-        return intent.getBooleanExtra(EXTRA_DEBUG_HIDE_BACK_BUTTON, false)
-    }
+    private fun isBackButtonDebugHidden(): Boolean = shouldHideBackButtonDebug(this)
 
     /** 主动展开 / 收起头部（Android 12 顶层页跳二级页时收起） */
     fun setToolbarExpanded(expanded: Boolean) {
@@ -408,5 +404,22 @@ abstract class CollapsingToolbarBaseActivity(
          */
         const val EXTRA_DEBUG_HIDE_BACK_BUTTON =
             "com.android.ty.systemservices.extra.DEBUG_HIDE_BACK_BUTTON"
+
+        /**
+         * 统一判定「是否需要因调试开关隐藏返回按钮」。
+         *
+         * 先看包是否 debuggable：release 的 `FLAG_DEBUGGABLE` 恒为 0，第一步就返回 false，
+         * 连 Intent 都不读，所以正式包的行为与没有这个开关时完全一致。
+         *
+         * 不继承 [CollapsingToolbarBaseActivity] 的页面（如纯 Compose 的 TestActivity）
+         * 也调用本方法，避免各自实现漏掉 debuggable 判断。
+         */
+        @JvmStatic
+        fun shouldHideBackButtonDebug(activity: Activity): Boolean {
+            val debuggable =
+                (activity.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+            if (!debuggable) return false
+            return activity.intent?.getBooleanExtra(EXTRA_DEBUG_HIDE_BACK_BUTTON, false) == true
+        }
     }
 }

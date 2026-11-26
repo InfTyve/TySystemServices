@@ -61,6 +61,18 @@ private val BigTitleSize = 32.sp
 /** 行高倍数，和折叠态顶栏标题（22sp）在终点处的观感对齐 */
 private const val LineHeightFactor = 1.18f
 
+/**
+ * 标题绘制盒相对行高的余量。
+ *
+ * `lineHeight` 只决定排版行距，不等于字形的实际占位：中文（Noto Sans CJK）
+ * 的 ascent / descent 比拉丁字体高一截，在部分 ROM（如 LineageOS）或系统字体
+ * 放大后，字形上下会超出这一行，被固定高度的盒子裁掉——表现就是大标题「显示不全」。
+ *
+ * 这里把盒子按比例放高，并改成底边对齐：文字底边位置不变，额外空间全部加在上方，
+ * 因此排版位置不动，只是不再裁字形。
+ */
+private const val TitleBoxHeightFactor = 1.4f
+
 /** 顶栏标题左边界：Row 起点 8 + 返回按钮 48 + 间隔 4 + 文字内边距 4 */
 private val CollapsedTitleStart = BackButtonInset + BackButtonSize + 8.dp
 
@@ -138,9 +150,11 @@ fun LargeTitleHeader(
         lineHeight = BigTitleSize * LineHeightFactor,
         fontWeight = FontWeight.Bold,
     )
-    val lineHeight = remember(density) {
-        with(density) { (BigTitleSize * LineHeightFactor).toDp() }
-    }
+        val lineHeight = remember(density) {
+            with(density) { (BigTitleSize * LineHeightFactor).toDp() }
+        }
+        // 绘制盒：比行高高一截，避免 CJK 字形被裁（见 TitleBoxHeightFactor）
+        val titleBoxHeight = lineHeight * TitleBoxHeightFactor
 
     BoxWithConstraints(
         modifier = modifier
@@ -221,7 +235,7 @@ fun LargeTitleHeader(
             // 「滑到顶部」和「渐变消失」因此是同一个动作，不会划到一半停住。
             scale = 1f
             left = TitleInset
-            topInternal = maxHeight - TitleInset - lineHeight
+            topInternal = maxHeight - TitleInset - titleBoxHeight
             maxTextWidth = maxWidth - TitleInset * 2
         } else {
             // SCALE 档：位置 + 字号连续插值，终点正好落在顶栏标题那一格
@@ -230,8 +244,8 @@ fun LargeTitleHeader(
             val startBottom = maxHeight - TitleInset
             val endBottom = CollapsedBarHeight / 2 + visualHeight / 2
             val screenBottom = lerp(startBottom, endBottom, progress)
-            // 屏幕坐标 → AppBarLayout 内部坐标
-            topInternal = screenBottom + pinnedOffset - lineHeight
+            // 屏幕坐标 → AppBarLayout 内部坐标（以绘制盒底边为准，字形底边与盒底重合）
+            topInternal = screenBottom + pinnedOffset - titleBoxHeight
 
             // 横坐标用 ease-out 提前完成，上升段开始时已在返回按钮右侧，不会重合
             val slide = 1f - (1f - progress) * (1f - progress)
@@ -254,8 +268,8 @@ fun LargeTitleHeader(
                     transformOrigin = TransformOrigin(0f, 1f)
                 }
                 .widthIn(max = if (maxTextWidth > 0.dp) maxTextWidth else 0.dp)
-                .height(lineHeight),
-            contentAlignment = Alignment.CenterStart,
+                .height(titleBoxHeight),
+            contentAlignment = Alignment.BottomStart,
         ) {
             Text(
                 text = title,
