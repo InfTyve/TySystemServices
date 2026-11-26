@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -16,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
@@ -37,8 +39,9 @@ import com.android.ty.systemservices.service.TestModeOverlay
  * - 标题栏由宿主 [com.android.ty.systemservices.compose.DevActivity] 的
  *   CollapsingToolbarBaseActivity 提供，这里不再重复 Scaffold 的 TopAppBar；
  * - 开关状态持久化在 `dev_settings`，重启应用由 ServiceSettings 恢复；
- * - 悬浮窗走 `TYPE_APPLICATION_OVERLAY`，层级在所有应用之上，不抢焦点、不拦触摸；
- * - 没有「显示在其他应用上层」权限时，点击开关会跳到系统授权页。
+ * - 浮层走系统窗口层级 TYPE_SYSTEM_ALERT + INTERNAL_SYSTEM_WINDOW（平台签名自动授予），
+ *   不申请也不依赖「显示在其他应用上层」；
+ * - 未获得系统签名权限时开关点不开，页面顶部提示卡会说明原因。
  */
 @Composable
 fun DevScreen() {
@@ -46,6 +49,8 @@ fun DevScreen() {
     var enabled by remember { mutableStateOf(TestModeOverlay.isEnabled(context)) }
     var hasPermission by remember { mutableStateOf(TestModeOverlay.canDrawOverlays(context)) }
     var checkSetupWizard by remember { mutableStateOf(ServiceDaemon.isSetupCheckEnabled(context)) }
+    // 浮层诊断：挂载数量 / 窗口层级 / 权限与 appop 状态，排查「开关开着却没浮窗」
+    var diagnostic by remember { mutableStateOf(TestModeOverlay.diagnostic(context)) }
 
     // 从系统授权页返回时刷新权限与开关状态
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -54,6 +59,7 @@ fun DevScreen() {
             if (event == Lifecycle.Event.ON_RESUME) {
                 hasPermission = TestModeOverlay.canDrawOverlays(context)
                 enabled = TestModeOverlay.isEnabled(context) && hasPermission
+                diagnostic = TestModeOverlay.diagnostic(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -84,14 +90,11 @@ fun DevScreen() {
                             description = stringResource(R.string.dev_test_mode_desc),
                             checked = enabled,
                             onCheckedChange = { want ->
-                                if (want && !hasPermission) {
-                                    // 先去要权限，拿到后再开
-                                    TestModeOverlay.requestPermission(context)
-                                } else {
-                                    // 返回值就是最终状态，直接回写开关
-                                    enabled = TestModeOverlay.setEnabled(context, want)
-                                    hasPermission = TestModeOverlay.canDrawOverlays(context)
-                                }
+                                // 没有系统签名权限时 setEnabled 会返回 false，开关自动回弹；
+                                // 这种情况无法通过系统设置页授权，上方提示卡会说明原因
+                                enabled = TestModeOverlay.setEnabled(context, want)
+                                hasPermission = TestModeOverlay.canDrawOverlays(context)
+                                diagnostic = TestModeOverlay.diagnostic(context)
                             },
                         )
                     }
@@ -108,6 +111,16 @@ fun DevScreen() {
                         )
                     }
                 }
+            }
+            item {
+                // 浮层实时状态：views 是实际挂上的窗口数，appop 是系统里那个开关。
+                // 「开关开着却没浮窗」时看这一行就能定位卡在哪一层。
+                Text(
+                    text = diagnostic,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                )
             }
         }
     }

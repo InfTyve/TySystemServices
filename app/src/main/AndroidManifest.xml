@@ -12,15 +12,13 @@
         android:name="android.permission.STATUS_BAR"
         tools:ignore="ProtectedPermissions" />
 
-    <!-- TestMode 悬浮窗（开发调试页使用），系统应用默认已授予 -->
-    <uses-permission
-        android:name="android.permission.SYSTEM_ALERT_WINDOW"
-        tools:ignore="ProtectedPermissions" />
-
     <!--
-        系统私有窗口层级：signature，平台签名自动授予。
-        有了它才能用 TYPE_SYSTEM_ALERT 加窗，层级在状态栏之上、
-        与 SystemUI 同一梯队，且不受「显示在其他应用上层」开关影响。
+        TestMode 悬浮窗（开发调试页使用）。
+
+        只用系统私有窗口层级：signature，平台签名自动授予，开机即生效。
+        刻意不申请 SYSTEM_ALERT_WINDOW——那会引入「显示在其他应用之上」的
+        特殊权限开关，属于 appop 路径，与本浮层无关。
+        也不能申请 MANAGE_APP_OPS_MODES 去改 appop，那样等于绕权限，没必要。
     -->
     <uses-permission
         android:name="android.permission.INTERNAL_SYSTEM_WINDOW"
