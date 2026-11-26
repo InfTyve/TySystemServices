@@ -85,7 +85,7 @@
     <string name="contributors_title">贡献者</string>
     <string name="dev_test_mode_title">TestMode 悬浮窗</string>
     <string name="dev_test_mode_desc">置于所有应用之上，仅作状态指示，不拦截触摸</string>
-    <string name="dev_overlay_permission_hint">尚未授予「显示在其他应用上层」权限，点击开关会跳转授权页</string>
+    <string name="dev_overlay_permission_hint">未获得 INTERNAL_SYSTEM_WINDOW 权限。此浮层走系统窗口层级，需要平台签名的系统应用</string>
     <string name="dev_title_test_mode">开发人员调试模式 \n By TeYun</string>
 
     <!-- 从默认 strings 迁移过来的中文 -->

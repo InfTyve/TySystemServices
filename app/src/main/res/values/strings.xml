@@ -185,7 +185,7 @@
     <string name="contributors_title">Contributors</string>
     <string name="dev_test_mode_title">TestMode overlay</string>
     <string name="dev_test_mode_desc">Floats above every app, indicator only, never blocks touches</string>
-    <string name="dev_overlay_permission_hint">"Display over other apps" is not granted yet; toggling will open the permission page</string>
+    <string name="dev_overlay_permission_hint">INTERNAL_SYSTEM_WINDOW is not granted. This overlay uses a system window layer and requires a platform-signed build</string>
     <string name="dev_title_test_mode">DeveloperDebugMode \n ByTeYun Studio</string>
 
     <!-- TestMode overlays -->

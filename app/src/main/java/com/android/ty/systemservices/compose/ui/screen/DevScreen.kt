@@ -39,9 +39,9 @@ import com.android.ty.systemservices.service.TestModeOverlay
  * - 标题栏由宿主 [com.android.ty.systemservices.compose.DevActivity] 的
  *   CollapsingToolbarBaseActivity 提供，这里不再重复 Scaffold 的 TopAppBar；
  * - 开关状态持久化在 `dev_settings`，重启应用由 ServiceSettings 恢复；
- * - 浮层优先走系统层级 TYPE_SYSTEM_ALERT（INTERNAL_SYSTEM_WINDOW），
- *   并由 TestModeOverlay 把 appop 置回 allowed，不受「显示在其他应用上层」开关影响；
- * - 没有系统权限时回退 TYPE_APPLICATION_OVERLAY，点击开关会跳到系统授权页。
+ * - 浮层走系统窗口层级 TYPE_SYSTEM_ALERT + INTERNAL_SYSTEM_WINDOW（平台签名自动授予），
+ *   不申请也不依赖「显示在其他应用上层」；
+ * - 未获得系统签名权限时开关点不开，页面顶部提示卡会说明原因。
  */
 @Composable
 fun DevScreen() {
@@ -90,15 +90,11 @@ fun DevScreen() {
                             description = stringResource(R.string.dev_test_mode_desc),
                             checked = enabled,
                             onCheckedChange = { want ->
-                                if (want && !hasPermission) {
-                                    // 先去要权限，拿到后再开
-                                    TestModeOverlay.requestPermission(context)
-                                } else {
-                                    // 返回值就是最终状态，直接回写开关
-                                    enabled = TestModeOverlay.setEnabled(context, want)
-                                    hasPermission = TestModeOverlay.canDrawOverlays(context)
-                                    diagnostic = TestModeOverlay.diagnostic(context)
-                                }
+                                // 没有系统签名权限时 setEnabled 会返回 false，开关自动回弹；
+                                // 这种情况无法通过系统设置页授权，上方提示卡会说明原因
+                                enabled = TestModeOverlay.setEnabled(context, want)
+                                hasPermission = TestModeOverlay.canDrawOverlays(context)
+                                diagnostic = TestModeOverlay.diagnostic(context)
                             },
                         )
                     }
