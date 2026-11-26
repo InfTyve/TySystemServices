@@ -17,6 +17,15 @@
         android:name="android.permission.SYSTEM_ALERT_WINDOW"
         tools:ignore="ProtectedPermissions" />
 
+    <!--
+        系统私有窗口层级：signature，平台签名自动授予。
+        有了它才能用 TYPE_SYSTEM_ALERT 加窗，层级在状态栏之上、
+        与 SystemUI 同一梯队，且不受「显示在其他应用上层」开关影响。
+    -->
+    <uses-permission
+        android:name="android.permission.INTERNAL_SYSTEM_WINDOW"
+        tools:ignore="ProtectedPermissions" />
+
     <!-- 熄屏显示轻触唤醒：FULL_WAKE_LOCK 走 PowerManagerService 的 wakeUp 路径 -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
