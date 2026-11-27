@@ -1,0 +1,77 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 构建类型
+        required: true
+        default: debug
+        type: choice
+        options:
+          - debug
+          - release
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install SDK packages
+        run: |
+          sdkmanager --install \
+            "platforms;android-37.1" \
+            "build-tools;36.0.0" \
+            "cmake;3.22.1" \
+            "ndk;28.2.13676358"
+
+      - name: Write signing config
+        run: |
+          cat >> local.properties <<EOF
+          RELEASE_STORE_FILE=${GITHUB_WORKSPACE}/test-signing.jks
+          RELEASE_STORE_PASSWORD=tyservices-test
+          RELEASE_KEY_ALIAS=tyservices-test
+          RELEASE_KEY_PASSWORD=tyservices-test
+          EOF
+
+      - name: Build
+        run: |
+          if [ "${{ inputs.build_type }}" = "release" ]; then
+            gradle assembleRelease --no-daemon --stacktrace -I .github/ci/test-signing.init.gradle
+          else
+            gradle assembleDebug --no-daemon --stacktrace -I .github/ci/test-signing.init.gradle
+          fi
+
+      - name: Verify APK signature
+        run: |
+          APK=$(find "app/build/outputs/apk/${{ inputs.build_type }}" -name '*.apk' -print -quit)
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "$APK" | tee "$RUNNER_TEMP/apk-certs.txt"
+          grep -qi '49a1be3c2ec1ae8502146c0f335485002122f1a4a56e631156bdc4add32b21c0' "$RUNNER_TEMP/apk-certs.txt"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TySystemServices-${{ inputs.build_type }}
+          path: app/build/outputs/apk/${{ inputs.build_type }}/*.apk
+          if-no-files-found: error
+

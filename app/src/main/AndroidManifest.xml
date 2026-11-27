@@ -143,7 +143,7 @@
                 android:resource="@drawable/code42" />
             <meta-data
                 android:name="com.android.settings.order"
-                android:value="42" />
+                android:value="40" />
         </activity-alias>
         <activity-alias
             android:name=".TopLevelDevTyActivity"
@@ -244,7 +244,7 @@
                 android:resource="@drawable/ic_settings_24dp" />
             <meta-data
                 android:name="com.android.settings.order"
-                android:value="-1" />
+                android:value="1" />
         </activity-alias>
 
         <activity

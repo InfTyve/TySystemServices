@@ -1,0 +1,22 @@
+// 测试签名，仅用于 CI 构建，不可用于正式发布
+allprojects { project ->
+    project.plugins.withId('com.android.application') {
+        def android = project.extensions.getByName('android')
+        def testSigning = android.signingConfigs.create('ciTest') {
+            storeFile new File(project.rootDir, 'test-signing.jks')
+            storePassword 'tyservices-test'
+            keyAlias 'tyservices-test'
+            keyPassword 'tyservices-test'
+            enableV1Signing true
+            enableV2Signing true
+            enableV3Signing true
+            enableV4Signing false
+            storeType 'PKCS12'
+        }
+        android.buildTypes.all { buildType ->
+            if (buildType.name == 'debug') {
+                buildType.signingConfig = testSigning
+            }
+        }
+    }
+}
