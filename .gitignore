@@ -14,3 +14,8 @@
 .cxx
 local.properties
 *.pk8
+*.jks
+!test-signing.jks
+*.keystore
+*.p12
+.aicode/
