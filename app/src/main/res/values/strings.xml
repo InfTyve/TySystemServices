@@ -197,6 +197,21 @@
     <string name="dev_setup_check_title">Setup wizard check</string>
     <string name="dev_setup_check_desc">Checks device_provisioned, user_setup_complete and setup_wizard_has_run; launches com.android.setup.MainActivity when all are 0</string>
 
+    <!-- Developer page: system info panel -->
+    <string name="dev_system_info_title">System info</string>
+    <string name="dev_system_info_uid">Runtime UID</string>
+    <string name="dev_system_info_android">Android version</string>
+    <string name="dev_system_info_android_value">Android %1$s (API %2$d)</string>
+    <string name="dev_system_info_build">Build number</string>
+    <string name="dev_system_info_storage">Storage</string>
+    <string name="dev_system_info_storage_value">%1$s used / %2$s total (%3$s free)</string>
+    <string name="dev_system_info_system_app">System app</string>
+    <string name="dev_system_info_yes">Yes</string>
+    <string name="dev_system_info_no">No</string>
+    <string name="dev_system_info_permissions">Permission status</string>
+    <string name="dev_system_info_permissions_granted">%1$d/%2$d granted</string>
+    <string name="dev_system_info_permissions_missing">%1$d/%2$d granted, missing: %3$s</string>
+
     <!-- ===== 以下为从代码 / XML 中抽取的硬编码文案 ===== -->
 
     <!-- preferences.xml（原硬编码中文） -->
