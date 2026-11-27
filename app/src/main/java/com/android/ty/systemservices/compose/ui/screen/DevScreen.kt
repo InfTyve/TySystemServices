@@ -134,7 +134,12 @@ fun DevScreen() {
                 }
             }
             item {
-                SystemInfoCard(info = systemInfo, diagnostic = diagnostic)
+                SegmentedColumn(title = stringResource(R.string.space)) {
+                    item {
+                        SystemInfoCard(info = systemInfo, diagnostic = diagnostic)
+                    }
+                
+                }
             }
         }
     }
