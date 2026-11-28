@@ -161,7 +161,10 @@ object TestModeOverlay {
     private val topMostFlagAvailable: Boolean by lazy { topMostPrivateFlag != null }
 
     /** 系统窗口类型，固定 2003；这条路径不需要 appop */
-    private fun overlayWindowType(): Int = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT
+    // WindowManager.LayoutParams.TYPE_SYSTEM_ALERT
+    //private fun overlaysysWindowType(): Int = WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL
+    //private fun overlayWindowType(): Int = WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL
+    private fun overlayWindowType(): Int = 2014
 
     private fun show(context: Context): Boolean {
         // 完整挂上过就直接返回；只挂上一半（某次 addView 失败）则清掉重建，
